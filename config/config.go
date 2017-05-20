@@ -58,8 +58,20 @@ func GetTumblrTokenSecret() string {
 	return os.Getenv("GOMIC_TUMBLR_TOKEN_SECRET")
 }
 
-func GetTags() []string {
-	return []string{"#inked", "#inking", "#illustration", "#drawing", "#drawings", "#art", "#artwork", "#draw", "#painting", "#sketch", "#sketchbook", "#artist", "#comics", "#comicart", "#comic", "#graphicnovel", "#design", "#concept", "#conceptart", "#create", "#creative", "#image", "#imagination"}
+func GetFacebookPageId() string {
+	return os.Getenv("FB_DEVABODE_ID")
+}
+
+func GetFacebookApplicationId() string {
+	return os.Getenv("FB_APPLICATION_ID")
+}
+
+func GetFacebookApplicationSecret() string {
+	return os.Getenv("FB_APPLICATION_SECRET")
+}
+
+func GetFacebookCallbackUrl() string {
+	return os.Getenv("FB_CALLBACK_URL")
 }
 
 func IsProd() bool {

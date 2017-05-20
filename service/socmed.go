@@ -16,27 +16,6 @@ type Content struct {
 	Tags                               []string
 }
 
-func checkContent(c *Content) error {
-	msg := []string{}
-	if len(c.Link) == 0 {
-		msg = append(msg, "No Link given")
-	}
-	if len(c.ImgUrl) == 0 {
-		msg = append(msg, "No ImgUrl given")
-	}
-	if len(c.Title) == 0 {
-		msg = append(msg, "No Title given")
-	}
-	if len(c.TagsCsvString) == 0 {
-		msg = append(msg, "No TagsCsvString given")
-	}
-
-	if len(msg) > 0 {
-		return errors.New(strings.Join(msg, ", "))
-	}
-	return nil
-}
-
 func NewSocMedService() *restful.WebService {
 	path := "/0.1/gomic/socmed"
 	service := new(restful.WebService)
@@ -48,7 +27,14 @@ func NewSocMedService() *restful.WebService {
 	log.Printf("Rest base path: %s\n", path)
 
 	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
+
 	service.Route(service.POST("/tumblr/callback").To(TumblrCallback))
+
+	service.Route(service.POST("/facebook/callback").To(FacebookCallback))
+	service.Route(service.GET("/facebook/callback").To(FacebookCallback))
+
+	service.Route(service.POST("/facebook/init").To(FacebookInit))
+	service.Route(service.GET("/facebook/init").To(FacebookInit))
 
 	return service
 }
@@ -86,6 +72,27 @@ func Publish(request *restful.Request, response *restful.Response) {
 	postToTumblr(c)
 
 	response.WriteEntity(p)
+}
+
+func checkContent(c *Content) error {
+	msg := []string{}
+	if len(c.Link) == 0 {
+		msg = append(msg, "No Link given")
+	}
+	if len(c.ImgUrl) == 0 {
+		msg = append(msg, "No ImgUrl given")
+	}
+	if len(c.Title) == 0 {
+		msg = append(msg, "No Title given")
+	}
+	if len(c.TagsCsvString) == 0 {
+		msg = append(msg, "No TagsCsvString given")
+	}
+
+	if len(msg) > 0 {
+		return errors.New(strings.Join(msg, ", "))
+	}
+	return nil
 }
 
 func prepareContent(c *Content) *Content {
