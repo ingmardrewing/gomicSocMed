@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/MariaTerzieva/gotumblr"
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
 	restful "github.com/emicklei/go-restful"
 	"github.com/ingmardrewing/gomicSocMed/config"
 )
@@ -68,52 +65,7 @@ func prepareContent(c *Content) *Content {
 	return c
 }
 
-func tweet(request *restful.Request, response *restful.Response) {
-	cred := oauth1.NewConfig(
-		config.GetTwitterConsumerKey(),
-		config.GetTwitterConsumerSecret())
-
-	token := oauth1.NewToken(
-		config.GetTwitterAccessToken(),
-		config.GetTwitterAccessTokenSecret())
-
-	httpClient := cred.Client(oauth1.NoContext, token)
-
-	client := twitter.NewClient(httpClient)
-	if client != nil {
-	}
-
-	/*
-		verifyParams := &twitter.AccountVerifyParams{
-			SkipStatus:   twitter.Bool(true),
-			IncludeEmail: twitter.Bool(true),
-		}
-		user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
-		fmt.Printf("User's ACCOUNT:\n%+v\n", user)
-
-		fmt.Println(getTweetText())
-	*/
-
-	// actually tweet
-	// tweet, _, _ := client.Statuses.Update(getTweetText(), nil)
-	// fmt.Printf("Posted tweet \n%v\n", tweet)
-}
-
-func getTweetText(tags []string) string {
-	url := "https://devabo.de"
-	tweet := "replace me" + url
-
-	for _, tag := range tags {
-		if utf8.RuneCountInString(tweet+" "+tag) > 140 {
-			return tweet
-		}
-		tweet += " " + tag
-	}
-
-	return tweet
-}
-
-func postToTumblr(request *restful.Request, response *restful.Response) {
+func postToTumblr() {
 	fmt.Println("Post to tumblr")
 
 	cons_key := config.GetTumblrConsumerKey()

@@ -53,3 +53,7 @@ func GetTumblrTokenSecret() string {
 func GetTags() []string {
 	return []string{"#inked", "#inking", "#illustration", "#drawing", "#drawings", "#art", "#artwork", "#draw", "#painting", "#sketch", "#sketchbook", "#artist", "#comics", "#comicart", "#comic", "#graphicnovel", "#design", "#concept", "#conceptart", "#create", "#creative", "#image", "#imagination"}
 }
+
+func IsProd() bool {
+	return os.Getenv("GOMIC_STAGE") == "prod"
+}
