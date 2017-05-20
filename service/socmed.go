@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"log"
 	"strings"
 
@@ -13,6 +14,27 @@ import (
 type Content struct {
 	Link, ImgUrl, Title, TagsCsvString string
 	Tags                               []string
+}
+
+func checkContent(c *Content) error {
+	msg := ""
+	if len(c.Link) == 0 {
+		msg += "No Link given\n"
+	}
+	if len(c.ImgUrl) == 0 {
+		msg += "No ImgUrl given\n"
+	}
+	if len(c.Title) == 0 {
+		msg += "No Title given\n"
+	}
+	if len(c.TagsCsvString) == 0 {
+		msg += "No TagsCsvString given\n"
+	}
+
+	if len(msg) > 0 {
+		return errors.New(msg)
+	}
+	return nil
 }
 
 func NewSocMedService() *restful.WebService {
@@ -31,15 +53,15 @@ func NewSocMedService() *restful.WebService {
 	return service
 }
 
-func basicAuthenticate(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	err := authenticate(req)
+func basicAuthenticate(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
+	err := authenticate(request)
 	if err != nil {
-		resp.AddHeader("WWW-Authenticate", "Basic realm=Protected Area")
-		resp.WriteErrorString(401, "401: Not Authorized")
+		response.AddHeader("WWW-Authenticate", "Basic realm=Protected Area")
+		response.WriteErrorString(401, "401: Not Authorized")
 		return
 	}
 
-	chain.ProcessFilter(req, resp)
+	chain.ProcessFilter(request, response)
 }
 
 func authenticate(req *restful.Request) error {
@@ -52,6 +74,12 @@ func authenticate(req *restful.Request) error {
 func Publish(request *restful.Request, response *restful.Response) {
 	c := new(Content)
 	request.ReadEntity(c)
+	err := checkContent(c)
+	if err != nil {
+		response.WriteErrorString(400, "400: Bad Request")
+		return
+	}
+
 	p := prepareContent(c)
 
 	response.WriteEntity(p)
