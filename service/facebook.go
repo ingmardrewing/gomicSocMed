@@ -45,6 +45,11 @@ func FacebookInit(request *restful.Request, response *restful.Response) {
 			Timeout: time.Second * 10,
 		}
 		fbResponse, _ := httpClient.Get(url)
+
+		defer fbResponse.Body.Close()
+
+		rbody, err := ioutil.ReadAll(fbResponse.Body)
+		fmt.Printf("Response: %s", string(rbody))
 	*/
 
 	http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
