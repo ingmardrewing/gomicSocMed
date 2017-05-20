@@ -5,6 +5,8 @@ import (
 	"log"
 	"unicode/utf8"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/MariaTerzieva/gotumblr"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -20,12 +22,32 @@ func NewSocMedService() *restful.WebService {
 		Consumes(restful.MIME_JSON).
 		Produces(restful.MIME_JSON)
 
-	log.Printf("Creating socmed service at localhost:8080 -- access with http://localhost:8080%s\n", path)
+	log.Printf("Rest base path: %s\n", path)
 
+	//service.Route(service.POST("/all").Filter(basicAuthenticate).To(Tweet))
 	service.Route(service.POST("/twitter").Filter(basicAuthenticate).To(Tweet))
 	service.Route(service.POST("/tumblr").Filter(basicAuthenticate).To(PostToTumblr))
 
 	return service
+}
+
+func basicAuthenticate(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	err := authenticate(req)
+
+	if err != nil {
+		resp.AddHeader("WWW-Authenticate", "Basic realm=Protected Area")
+		resp.WriteErrorString(401, "401: Not Authorized")
+		return
+	}
+
+	chain.ProcessFilter(req, resp)
+}
+
+func authenticate(req *restful.Request) error {
+	user, pass, _ := req.Request.BasicAuth()
+	given_pass := []byte(pass)
+	stored_hash := []byte(config.GetPasswordHashForUser(user))
+	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
 }
 
 func Tweet(request *restful.Request, response *restful.Response) {
@@ -40,6 +62,8 @@ func Tweet(request *restful.Request, response *restful.Response) {
 	httpClient := cred.Client(oauth1.NoContext, token)
 
 	client := twitter.NewClient(httpClient)
+	if client != nil {
+	}
 
 	/*
 		verifyParams := &twitter.AccountVerifyParams{
@@ -53,8 +77,8 @@ func Tweet(request *restful.Request, response *restful.Response) {
 	*/
 
 	// actually tweet
-	tweet, _, _ := client.Statuses.Update(getTweetText(), nil)
-	fmt.Printf("Posted tweet \n%v\n", tweet)
+	// tweet, _, _ := client.Statuses.Update(getTweetText(), nil)
+	// fmt.Printf("Posted tweet \n%v\n", tweet)
 }
 
 func getTweetText() string {
@@ -94,17 +118,22 @@ func PostToTumblr(request *restful.Request, response *restful.Response) {
 	tags := "comic,webcomic,graphicnovel,drawing,art,narrative,scifi,sci-fi,science-fiction,dystopy,parody,humor,nerd,pulp,geek,blackandwhite"
 	prodUrl := "https://devabo.de ..."
 
-	photoPostByURL := client.CreatePhoto(
-		blogname,
-		map[string]string{
-			"link":    prodUrl,
-			"source":  "replace me",
-			"caption": "replace me",
-			"tags":    tags,
-			"state":   state})
-	if photoPostByURL == nil {
-		fmt.Println("done")
-	} else {
-		fmt.Println(photoPostByURL)
+	if client != nil && len(blogname) > 0 && len(state) > 0 && len(tags) > 0 && len(prodUrl) > 0 {
 	}
+
+	/*
+		photoPostByURL := client.CreatePhoto(
+			blogname,
+			map[string]string{
+				"link":    prodUrl,
+				"source":  "replace me",
+				"caption": "replace me",
+				"tags":    tags,
+				"state":   state})
+		if photoPostByURL == nil {
+			fmt.Println("done")
+		} else {
+			fmt.Println(photoPostByURL)
+		}
+	*/
 }
