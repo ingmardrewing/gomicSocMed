@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"strings"
 	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
@@ -48,13 +49,23 @@ func authenticate(req *restful.Request) error {
 }
 
 type Content struct {
-	Link, ImgUrl, Title, Tags string
+	Link, ImgUrl, Title, TagsCsvString string
+	Tags                               []string
 }
 
 func Publish(request *restful.Request, response *restful.Response) {
-	p := new(Content)
-	request.ReadEntity(p)
+	c := new(Content)
+	request.ReadEntity(c)
+	p := prepareContent(c)
+
 	response.WriteEntity(p)
+}
+
+func prepareContent(c *Content) *Content {
+	if len(c.TagsCsvString) > 0 {
+		c.Tags = strings.Split(c.TagsCsvString, ",")
+	}
+	return c
 }
 
 func tweet(request *restful.Request, response *restful.Response) {
