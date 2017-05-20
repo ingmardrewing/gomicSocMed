@@ -17,22 +17,22 @@ type Content struct {
 }
 
 func checkContent(c *Content) error {
-	msg := ""
+	msg := []string{}
 	if len(c.Link) == 0 {
-		msg += "No Link given\n"
+		msg = append(msg, "No Link given")
 	}
 	if len(c.ImgUrl) == 0 {
-		msg += "No ImgUrl given\n"
+		msg = append(msg, "No ImgUrl given")
 	}
 	if len(c.Title) == 0 {
-		msg += "No Title given\n"
+		msg = append(msg, "No Title given")
 	}
 	if len(c.TagsCsvString) == 0 {
-		msg += "No TagsCsvString given\n"
+		msg = append(msg, "No TagsCsvString given")
 	}
 
 	if len(msg) > 0 {
-		return errors.New(msg)
+		return errors.New(strings.Join(msg, ", "))
 	}
 	return nil
 }
@@ -76,7 +76,7 @@ func Publish(request *restful.Request, response *restful.Response) {
 	request.ReadEntity(c)
 	err := checkContent(c)
 	if err != nil {
-		response.WriteErrorString(400, "400: Bad Request")
+		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
 
