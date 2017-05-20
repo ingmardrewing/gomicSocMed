@@ -34,6 +34,14 @@ func GetTwitterAccessTokenSecret() string {
 	return s
 }
 
+func GetTumblrCallbackUrl() string {
+	return os.Getenv("GOMIC_TUMBLR_CALLBACK_URL")
+}
+
+func GetTumblrBlogName() string {
+	return os.Getenv("GOMIC_TUMBLR_BLOG_NAME")
+}
+
 func GetTumblrConsumerKey() string {
 	return os.Getenv("GOMIC_TUMBLR_CONSUMER_KEY")
 }
