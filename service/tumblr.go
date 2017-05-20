@@ -4,8 +4,13 @@ import (
 	"fmt"
 
 	"github.com/MariaTerzieva/gotumblr"
+	restful "github.com/emicklei/go-restful"
 	"github.com/ingmardrewing/gomicSocMed/config"
 )
+
+func TumblrCallback(request *restful.Request, response *restful.Response) {
+	// avoidign errors
+}
 
 func postToTumblr(c *Content) {
 	client := getTumblrClient()

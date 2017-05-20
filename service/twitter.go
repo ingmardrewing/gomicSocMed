@@ -44,8 +44,7 @@ func tweetContent(client *twitter.Client, c *Content) {
 }
 
 func getTweetText(c *Content) string {
-	url := "https://devabo.de"
-	tweet := "replace me" + url
+	tweet := c.Title + " " + c.Link
 
 	for _, tag := range c.Tags {
 		if utf8.RuneCountInString(tweet+" "+tag) > 140 {

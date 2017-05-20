@@ -26,6 +26,7 @@ func NewSocMedService() *restful.WebService {
 	log.Printf("Rest base path: %s\n", path)
 
 	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
+	service.Route(service.POST("/tumblr/callback").To(TumblrCallback))
 
 	return service
 }
