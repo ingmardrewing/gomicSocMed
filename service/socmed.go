@@ -24,16 +24,13 @@ func NewSocMedService() *restful.WebService {
 
 	log.Printf("Rest base path: %s\n", path)
 
-	//service.Route(service.POST("/all").Filter(basicAuthenticate).To(Tweet))
-	service.Route(service.POST("/twitter").Filter(basicAuthenticate).To(Tweet))
-	service.Route(service.POST("/tumblr").Filter(basicAuthenticate).To(PostToTumblr))
+	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
 
 	return service
 }
 
 func basicAuthenticate(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 	err := authenticate(req)
-
 	if err != nil {
 		resp.AddHeader("WWW-Authenticate", "Basic realm=Protected Area")
 		resp.WriteErrorString(401, "401: Not Authorized")
@@ -50,7 +47,17 @@ func authenticate(req *restful.Request) error {
 	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
 }
 
-func Tweet(request *restful.Request, response *restful.Response) {
+type Content struct {
+	Link, ImgUrl, Title, Tags string
+}
+
+func Publish(request *restful.Request, response *restful.Response) {
+	p := new(Content)
+	request.ReadEntity(p)
+	response.WriteEntity(p)
+}
+
+func tweet(request *restful.Request, response *restful.Response) {
 	cred := oauth1.NewConfig(
 		config.GetTwitterConsumerKey(),
 		config.GetTwitterConsumerSecret())
@@ -81,11 +88,11 @@ func Tweet(request *restful.Request, response *restful.Response) {
 	// fmt.Printf("Posted tweet \n%v\n", tweet)
 }
 
-func getTweetText() string {
+func getTweetText(tags []string) string {
 	url := "https://devabo.de"
 	tweet := "replace me" + url
 
-	for _, tag := range config.GetTags() {
+	for _, tag := range tags {
 		if utf8.RuneCountInString(tweet+" "+tag) > 140 {
 			return tweet
 		}
@@ -95,7 +102,7 @@ func getTweetText() string {
 	return tweet
 }
 
-func PostToTumblr(request *restful.Request, response *restful.Response) {
+func postToTumblr(request *restful.Request, response *restful.Response) {
 	fmt.Println("Post to tumblr")
 
 	cons_key := config.GetTumblrConsumerKey()
@@ -115,10 +122,10 @@ func PostToTumblr(request *restful.Request, response *restful.Response) {
 
 	blogname := "devabo-de.tumblr.com"
 	state := "published"
-	tags := "comic,webcomic,graphicnovel,drawing,art,narrative,scifi,sci-fi,science-fiction,dystopy,parody,humor,nerd,pulp,geek,blackandwhite"
+	//tags := "comic,webcomic,graphicnovel,drawing,art,narrative,scifi,sci-fi,science-fiction,dystopy,parody,humor,nerd,pulp,geek,blackandwhite"
 	prodUrl := "https://devabo.de ..."
 
-	if client != nil && len(blogname) > 0 && len(state) > 0 && len(tags) > 0 && len(prodUrl) > 0 {
+	if client != nil && len(blogname) > 0 && len(state) > 0 && len(prodUrl) > 0 {
 	}
 
 	/*
@@ -126,8 +133,8 @@ func PostToTumblr(request *restful.Request, response *restful.Response) {
 			blogname,
 			map[string]string{
 				"link":    prodUrl,
-				"source":  "replace me",
-				"caption": "replace me",
+				"source":  "imgUrl",
+				"caption": "title",
 				"tags":    tags,
 				"state":   state})
 		if photoPostByURL == nil {
