@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"log"
 	"unicode/utf8"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -10,18 +10,19 @@ import (
 )
 
 func tweet(c *Content) {
+	log.Println("Tweeting content")
 	client := getTwitterClient()
-	/*
-		verifyParams := &twitter.AccountVerifyParams{
-			SkipStatus:   twitter.Bool(true),
-			IncludeEmail: twitter.Bool(true),
-		}
-		user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
-		fmt.Printf("User's ACCOUNT:\n%+v\n", user)
-
-		fmt.Println(getTweetText(c))
-	*/
+	verify(client)
 	tweetContent(client, c)
+}
+
+func verify(client *twitter.Client) {
+	verifyParams := &twitter.AccountVerifyParams{
+		SkipStatus:   twitter.Bool(true),
+		IncludeEmail: twitter.Bool(true),
+	}
+	user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
+	log.Printf("User's ACCOUNT:\n%+v\n", user)
 }
 
 func getTwitterClient() *twitter.Client {
@@ -39,7 +40,7 @@ func getTwitterClient() *twitter.Client {
 func tweetContent(client *twitter.Client, c *Content) {
 	if config.IsProd() {
 		tweet, _, _ := client.Statuses.Update(getTweetText(c), nil)
-		fmt.Printf("Posted tweet \n%v\n", tweet)
+		log.Printf("Posted tweet \n%v\n", tweet)
 	}
 }
 

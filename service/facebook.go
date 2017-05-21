@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -15,6 +14,7 @@ import (
 	restful "github.com/emicklei/go-restful"
 	fb "github.com/huandu/facebook"
 	"github.com/ingmardrewing/gomicSocMed/config"
+	"github.com/ingmardrewing/gomicSocMed/db"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 )
@@ -72,30 +72,11 @@ func FacebookInit(request *restful.Request, response *restful.Response) {
 	http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
 }
 
-//func Publish
-/*
-func FacebookInit(w http.ResponseWriter, r *http.Request) {
-	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
-	if err != nil {
-		log.Fatal("Parse: ", err)
-	}
-	parameters := url.Values{}
-	parameters.Add("client_id", oauthConf.ClientID)
-	parameters.Add("scope", strings.Join(oauthConf.Scopes, " "))
-	parameters.Add("redirect_uri", oauthConf.RedirectURL)
-	parameters.Add("response_type", "code")
-	parameters.Add("state", oauthStateString)
-	Url.RawQuery = parameters.Encode()
-	url := Url.String()
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-}
-*/
-
 func FacebookCallback(r *restful.Request, response *restful.Response) {
 	code := r.Request.FormValue("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
+		log.Printf("oauthConf.Exchange() failed with '%s'\n", err)
 		return
 	}
 
@@ -103,7 +84,7 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 	resp, err := http.Get(accounts_url)
 	if err != nil {
-		fmt.Printf("Get: %s\n", err)
+		log.Printf("Get: %s\n", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -114,9 +95,9 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 }
 
 func postToFacebook(c *Content) {
-	fmt.Println("Posting to facebook")
+	log.Println("Posting to facebook")
 
-	access_token, _ := retrieveFBAccessTokens()
+	access_token := retrieveFBAccessTokens()
 	page_id := config.GetFacebookPageId()
 
 	config.GetFacebookPageId()
@@ -131,9 +112,9 @@ func postToFacebook(c *Content) {
 		"access_token": access_token,
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	} else {
-		fmt.Println("Facebook posting succeeded")
+		log.Println("Facebook posting succeeded")
 	}
 }
 
@@ -154,10 +135,13 @@ func storeFBAccessToken(token string) {
 	// TODO parse json properly, store all tokens
 	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
 	matches := re.FindStringSubmatch(token)
-	ioutil.WriteFile("fb_token", []byte(matches[1]), 0644)
+	if db.TokenExists("fb_devabode") {
+		db.UpdateToken("fb_devabode", matches[1])
+	} else {
+		db.InsertToken("fb_devabode", matches[1])
+	}
 }
 
-func retrieveFBAccessTokens() (string, string) {
-	buf, _ := ioutil.ReadFile("fb_token")
-	return string(buf), ""
+func retrieveFBAccessTokens() string {
+	return db.GetToken("fb_devabode")
 }

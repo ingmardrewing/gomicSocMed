@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/ingmardrewing/gomicRest/config"
+	"github.com/ingmardrewing/gomicSocMed/config"
 )
 
 var db *sql.DB
@@ -17,21 +17,21 @@ func Initialize() {
 }
 
 func InsertToken(key string, value string) {
-	stmt, err := db.Prepare("INSERT INTO tokens (key, value) VALUES(?, ?)")
+	stmt, err := db.Prepare("INSERT INTO tokens (tkey, tvalue) VALUES(?, ?)")
 	handleErr(err)
 	_, err = stmt.Exec(key, value)
 	handleErr(err)
 }
 
 func UpdateToken(key string, value string) {
-	stmt, err := db.Prepare("UPDATE tokens SET value=? WHERE key=?")
+	stmt, err := db.Prepare("UPDATE tokens SET tvalue=? WHERE tkey=?")
 	handleErr(err)
 	_, err = stmt.Exec(value, key)
 	handleErr(err)
 }
 
 func DeleteToken(key string) {
-	stmt, err := db.Prepare("DELETE FROM tokens WHERE key=?")
+	stmt, err := db.Prepare("DELETE FROM tokens WHERE tkey=?")
 	handleErr(err)
 	_, err = stmt.Exec(key)
 	handleErr(err)
@@ -39,11 +39,20 @@ func DeleteToken(key string) {
 
 func GetToken(key string) string {
 	var token string
-	err := db.QueryRow("SELECT value FROM tokens WHERE key=?", key).Scan(&token)
+	err := db.QueryRow("SELECT tvalue FROM tokens WHERE tkey=?", key).Scan(&token)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return token
+}
+
+func TokenExists(key string) bool {
+	var amount string
+	err := db.QueryRow("SELECT count(*) FROM tokens WHERE tkey=?", key).Scan(&amount)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return amount == "1"
 }
 
 func handleErr(err error) {
@@ -93,7 +102,8 @@ func getDbData(rows *sql.Rows) []content.Page {
 
 /*
 CREATE TABLE tokens (
-	key VARCHAR(255) NOT NULL UNIQUE,
-	value VARCHAR(1024) NOT NULL UNIQUE
+	tkey VARCHAR(255) NOT NULL,
+	tvalue VARCHAR(1024) ,
+	CONSTRAINT UC_key UNIQUE( tkey )
 );
 */

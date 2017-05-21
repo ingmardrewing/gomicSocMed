@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/MariaTerzieva/gotumblr"
 	restful "github.com/emicklei/go-restful"
@@ -9,10 +9,11 @@ import (
 )
 
 func TumblrCallback(request *restful.Request, response *restful.Response) {
-	// avoidign errors
+	// TODO
 }
 
 func postToTumblr(c *Content) {
+	log.Println("Posting to tumblr")
 	client := getTumblrClient()
 	mappedContent := getMappedContent(c)
 
@@ -21,7 +22,9 @@ func postToTumblr(c *Content) {
 			config.GetTumblrBlogName(),
 			mappedContent)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
+		} else {
+			log.Println("Posting to tumblr succeeded")
 		}
 	}
 }
