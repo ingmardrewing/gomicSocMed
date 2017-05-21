@@ -47,10 +47,10 @@ func getTweetText(c *Content) string {
 	tweet := c.Title + " " + c.Link
 
 	for _, tag := range c.Tags {
-		if utf8.RuneCountInString(tweet+" "+tag) > 140 {
+		if utf8.RuneCountInString(tweet+" #"+tag) > 140 {
 			return tweet
 		}
-		tweet += " " + tag
+		tweet += " #" + tag
 	}
 
 	return tweet

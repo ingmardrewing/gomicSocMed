@@ -7,10 +7,13 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	restful "github.com/emicklei/go-restful"
+	fb "github.com/huandu/facebook"
 	"github.com/ingmardrewing/gomicSocMed/config"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
@@ -66,16 +69,7 @@ func FacebookInit(request *restful.Request, response *restful.Response) {
 	Url.RawQuery = parameters.Encode()
 	url := Url.String()
 
-	httpClient := &http.Client{
-		Timeout: time.Second * 10,
-	}
-	fbResponse, _ := httpClient.Head(url)
-	for k, v := range fbResponse.Header {
-		fmt.Printf("key:%s, value:%s\n", k, v)
-	}
-
-	//rbody, err := ioutil.ReadAll(fbResponse.Body)
-	//http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
+	http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
 }
 
 //func Publish
@@ -98,21 +92,16 @@ func FacebookInit(w http.ResponseWriter, r *http.Request) {
 */
 
 func FacebookCallback(r *restful.Request, response *restful.Response) {
-
-	state := r.Request.FormValue("state")
 	code := r.Request.FormValue("code")
-
-	fmt.Println(state)
-	fmt.Println(code)
-
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
 		return
 	}
 
-	resp, err := http.Get("https://graph.facebook.com/me?access_token=" +
-		url.QueryEscape(token.AccessToken))
+	accounts_url := "https://graph.facebook.com/me/accounts?access_token=" + url.QueryEscape(token.AccessToken)
+
+	resp, err := http.Get(accounts_url)
 	if err != nil {
 		fmt.Printf("Get: %s\n", err)
 		return
@@ -121,38 +110,51 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 	response2, _ := ioutil.ReadAll(resp.Body)
 
-	log.Printf("parseResponseBody: %s\n", string(response2))
+	storeFBAccessToken(string(response2))
 }
 
-func logRequest(r *restful.Request) {
+func postToFacebook(c *Content) {
+	fmt.Println("Posting to facebook")
 
-	// Create return string
-	var req []string
-	// Add the request string
-	url := fmt.Sprintf("%v %v %v", r.Request.Method, r.Request.URL, r.Request.Proto)
-	req = append(req, url)
-	// Add the host
-	req = append(req, fmt.Sprintf("Host: %v", r.Request.Host))
-	// Loop through headers
-	for name, headers := range r.Request.Header {
-		name = strings.ToLower(name)
-		for _, h := range headers {
-			req = append(req, fmt.Sprintf("%v: %v", name, h))
+	access_token, _ := retrieveFBAccessTokens()
+	page_id := config.GetFacebookPageId()
+
+	config.GetFacebookPageId()
+	// TODO test
+	res, e := fb.Post("/"+page_id+"/feed", fb.Params{
+		"type":         "link",
+		"name":         c.Title,
+		"caption":      c.Title,
+		"picture":      c.ImgUrl,
+		"link":         c.Link,
+		"description":  getFBTags(c),
+		"access_token": access_token,
+	})
+	fmt.Println(e)
+	fmt.Println(res)
+}
+
+func getFBTags(c *Content) string {
+	txt := ""
+
+	for _, tag := range c.Tags {
+		if utf8.RuneCountInString(txt+" #"+tag) > 140 {
+			return txt
 		}
+		txt += " #" + tag
 	}
 
-	// If this is a POST, add post data
-	if r.Request.Method == "POST" {
-		r.Request.ParseForm()
-		req = append(req, "\n")
-		req = append(req, r.Request.Form.Encode())
-	}
-	// Return the request as a string
-	fmt.Println(strings.Join(req, "\n"))
+	return txt
 }
 
-/*
-func FacebookCallback(w http.ResponseWriter, r *http.Request) {
-
+func storeFBAccessToken(token string) {
+	// TODO parse json properly, store all tokens
+	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
+	matches := re.FindStringSubmatch(token)
+	ioutil.WriteFile("fb_token", []byte(matches[1]), 0644)
 }
-*/
+
+func retrieveFBAccessTokens() (string, string) {
+	buf, _ := ioutil.ReadFile("fb_token")
+	return string(buf), ""
+}
