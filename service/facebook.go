@@ -120,25 +120,24 @@ func postToFacebook(c *Content) {
 	page_id := config.GetFacebookPageId()
 
 	config.GetFacebookPageId()
-	// TODO test
-	res, err := fb.Post("/"+page_id+"/feed", fb.Params{
+	_, err := fb.Post("/"+page_id+"/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
 		"caption":      c.Title,
 		"picture":      c.ImgUrl,
 		"link":         c.Link,
-		"description":  "A new comic page is online ...",
-		"message":      getFBTags(c),
+		"description":  c.Description,
+		"message":      getTagsForFacebook(c),
 		"access_token": access_token,
 	})
 	if err != nil {
-		fmt.Println(e)
+		fmt.Println(err)
 	} else {
 		fmt.Println("Facebook posting succeeded")
 	}
 }
 
-func getFBTags(c *Content) string {
+func getTagsForFacebook(c *Content) string {
 	txt := ""
 
 	for _, tag := range c.Tags {

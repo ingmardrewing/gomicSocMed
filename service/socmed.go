@@ -12,8 +12,8 @@ import (
 )
 
 type Content struct {
-	Link, ImgUrl, Title, TagsCsvString string
-	Tags                               []string
+	Link, ImgUrl, Title, TagsCsvString, Description string
+	Tags                                            []string
 }
 
 func NewSocMedService() *restful.WebService {
@@ -88,6 +88,9 @@ func checkContent(c *Content) error {
 	}
 	if len(c.TagsCsvString) == 0 {
 		msg = append(msg, "No TagsCsvString given")
+	}
+	if len(c.Description) == 0 {
+		msg = append(msg, "No Description given")
 	}
 
 	if len(msg) > 0 {
