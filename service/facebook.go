@@ -121,7 +121,7 @@ func postToFacebook(c *Content) {
 
 	config.GetFacebookPageId()
 	// TODO test
-	res, e := fb.Post("/"+page_id+"/feed", fb.Params{
+	res, err := fb.Post("/"+page_id+"/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
 		"caption":      c.Title,
@@ -131,8 +131,11 @@ func postToFacebook(c *Content) {
 		"message":      getFBTags(c),
 		"access_token": access_token,
 	})
-	fmt.Println(e)
-	fmt.Println(res)
+	if err != nil {
+		fmt.Println(e)
+	} else {
+		fmt.Println("Facebook posting succeeded")
+	}
 }
 
 func getFBTags(c *Content) string {
