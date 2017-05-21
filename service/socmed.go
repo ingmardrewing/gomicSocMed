@@ -68,8 +68,9 @@ func Publish(request *restful.Request, response *restful.Response) {
 
 	p := prepareContent(c)
 
-	tweet(c)
-	postToTumblr(c)
+	//tweet(c)
+	//postToTumblr(c)
+	postToFacebook(c)
 
 	response.WriteEntity(p)
 }

@@ -127,7 +127,8 @@ func postToFacebook(c *Content) {
 		"caption":      c.Title,
 		"picture":      c.ImgUrl,
 		"link":         c.Link,
-		"description":  getFBTags(c),
+		"description":  "A new comic page is online ...",
+		"message":      getFBTags(c),
 		"access_token": access_token,
 	})
 	fmt.Println(e)
