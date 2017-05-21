@@ -4,14 +4,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	restful "github.com/emicklei/go-restful"
 	"github.com/ingmardrewing/gomicSocMed/config"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
+)
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
 
 var (
@@ -22,8 +31,24 @@ var (
 		Scopes:       []string{"public_profile"},
 		Endpoint:     facebook.Endpoint,
 	}
-	oauthStateString = "thisshouldberandom"
+	src = rand.NewSource(time.Now().UnixNano())
 )
+
+func getRandomString(n int) string {
+	b := make([]byte, n)
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+	return string(b)
+}
 
 func FacebookInit(request *restful.Request, response *restful.Response) {
 	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
@@ -36,23 +61,21 @@ func FacebookInit(request *restful.Request, response *restful.Response) {
 	parameters.Add("scope", strings.Join(oauthConf.Scopes, " "))
 	parameters.Add("redirect_uri", oauthConf.RedirectURL)
 	parameters.Add("response_type", "code")
-	parameters.Add("state", oauthStateString)
+	parameters.Add("state", getRandomString(18))
 
 	Url.RawQuery = parameters.Encode()
 	url := Url.String()
-	/*
-		httpClient := &http.Client{
-			Timeout: time.Second * 10,
-		}
-		fbResponse, _ := httpClient.Get(url)
 
-		defer fbResponse.Body.Close()
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	fbResponse, _ := httpClient.Head(url)
+	for k, v := range fbResponse.Header {
+		fmt.Printf("key:%s, value:%s\n", k, v)
+	}
 
-		rbody, err := ioutil.ReadAll(fbResponse.Body)
-		fmt.Printf("Response: %s", string(rbody))
-	*/
-
-	http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
+	//rbody, err := ioutil.ReadAll(fbResponse.Body)
+	//http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
 }
 
 //func Publish
