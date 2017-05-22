@@ -26,6 +26,8 @@ func NewSocMedService() *restful.WebService {
 
 	log.Printf("Rest base path: %s\n", path)
 
+	service.Route(service.POST("/echo").Filter(basicAuthenticate).To(Echo))
+
 	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
 
 	service.Route(service.POST("/tumblr/callback").To(TumblrCallback))
@@ -57,6 +59,19 @@ func authenticate(req *restful.Request) error {
 	stored_hash := []byte(config.GetPasswordHashForUser(user))
 	//hash, _ := bcrypt.GenerateFromPassword(given_pass, coast)
 	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
+}
+
+func Echo(request *restful.Request, response *restful.Response) {
+	c := new(Content)
+	request.ReadEntity(c)
+	err := checkContent(c)
+	if err != nil {
+		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
+		return
+	}
+
+	p := prepareContent(c)
+	response.WriteEntity(p)
 }
 
 func Publish(request *restful.Request, response *restful.Response) {
