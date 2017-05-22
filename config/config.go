@@ -85,3 +85,9 @@ func GetDsn() string {
 	host := os.Getenv("DB_GOMIC_HOST")
 	return fmt.Sprintf("%s:%s@%s/%s", user, pass, host, name)
 }
+
+func GetSslPaths() (string, string) {
+	cert := os.Getenv("TLS_CERT_PATH")
+	key := os.Getenv("TLS_KEY_PATH")
+	return cert, key
+}
