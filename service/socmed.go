@@ -41,6 +41,7 @@ func NewSocMedService() *restful.WebService {
 
 func basicAuthenticate(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
 	err := authenticate(request)
+	log.Println(err)
 	if err != nil {
 		response.AddHeader("WWW-Authenticate", "Basic realm=Protected Area")
 		response.WriteErrorString(401, "401: Not Authorized")
@@ -54,6 +55,7 @@ func authenticate(req *restful.Request) error {
 	user, pass, _ := req.Request.BasicAuth()
 	given_pass := []byte(pass)
 	stored_hash := []byte(config.GetPasswordHashForUser(user))
+	//hash, _ := bcrypt.GenerateFromPassword(given_pass, coast)
 	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
 }
 
@@ -68,9 +70,9 @@ func Publish(request *restful.Request, response *restful.Response) {
 
 	p := prepareContent(c)
 
-	//tweet(c)
-	//postToTumblr(c)
-	//postToFacebook(c)
+	tweet(c)
+	postToTumblr(c)
+	postToFacebook(c)
 
 	response.WriteEntity(p)
 }

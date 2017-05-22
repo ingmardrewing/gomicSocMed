@@ -7,7 +7,7 @@ import (
 
 func GetPasswordHashForUser(user string) string {
 	// TODO impl. user dependent hash retrieval
-	return os.Getenv("GOMIC_BASIC_AUTH_PASS")
+	return os.Getenv("GOMIC_BASIC_AUTH_PASS_HASH")
 }
 
 func GetTwitterConsumerKey() string {
