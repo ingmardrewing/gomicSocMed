@@ -86,7 +86,7 @@ func GetDsn() string {
 	return fmt.Sprintf("%s:%s@%s/%s", user, pass, host, name)
 }
 
-func GetSslPaths() (string, string) {
+func GetTlsPaths() (string, string) {
 	cert := os.Getenv("TLS_CERT_PATH")
 	key := os.Getenv("TLS_KEY_PATH")
 	return cert, key

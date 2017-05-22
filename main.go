@@ -14,7 +14,9 @@ func main() {
 	db.Initialize()
 	restful.Add(service.NewSocMedService())
 
-	crt, key := config.GetSslPaths()
+	crt, key := config.GetTlsPaths()
+	log.Printf("crt path: %s\n", crt)
+	log.Printf("key path: %s\n", key)
 	err := http.ListenAndServeTLS(":443", crt, key, nil)
 	if err != nil {
 		log.Fatal(err.Error())
