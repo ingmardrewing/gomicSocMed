@@ -29,6 +29,9 @@ func NewSocMedService() *restful.WebService {
 	service.Route(service.POST("/echo").Filter(basicAuthenticate).To(Echo))
 
 	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
+	service.Route(service.POST("/publishtwitter").Filter(basicAuthenticate).To(PublishTwitter))
+	service.Route(service.POST("/publishfacebook").Filter(basicAuthenticate).To(PublishFacebook))
+	service.Route(service.POST("/publishtumblr").Filter(basicAuthenticate).To(PublishTumblr))
 
 	service.Route(service.POST("/tumblr/callback").To(TumblrCallback))
 
@@ -62,34 +65,58 @@ func authenticate(req *restful.Request) error {
 }
 
 func Echo(request *restful.Request, response *restful.Response) {
-	c := new(Content)
-	request.ReadEntity(c)
-	err := checkContent(c)
+	err, c := readContent(request)
 	if err != nil {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-
-	p := prepareContent(c)
-	response.WriteEntity(p)
+	response.WriteEntity(c)
 }
 
 func Publish(request *restful.Request, response *restful.Response) {
-	c := new(Content)
-	request.ReadEntity(c)
-	err := checkContent(c)
+	err, c := readContent(request)
 	if err != nil {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-
-	p := prepareContent(c)
-
 	tweet(c)
 	postToTumblr(c)
 	postToFacebook(c)
 
-	response.WriteEntity(p)
+	response.WriteEntity(c)
+}
+
+func PublishTwitter(request *restful.Request, response *restful.Response) {
+	err, c := readContent(request)
+	if err != nil {
+		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
+		return
+	}
+	tweet(c)
+
+	response.WriteEntity(c)
+}
+
+func PublishFacebook(request *restful.Request, response *restful.Response) {
+	err, c := readContent(request)
+	if err != nil {
+		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
+		return
+	}
+	postToFacebook(c)
+
+	response.WriteEntity(c)
+}
+
+func PublishTumblr(request *restful.Request, response *restful.Response) {
+	err, c := readContent(request)
+	if err != nil {
+		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
+		return
+	}
+	postToTumblr(c)
+
+	response.WriteEntity(c)
 }
 
 func checkContent(c *Content) error {
@@ -116,9 +143,15 @@ func checkContent(c *Content) error {
 	return nil
 }
 
-func prepareContent(c *Content) *Content {
+func readContent(request *restful.Request) (error, *Content) {
+	c := new(Content)
+	request.ReadEntity(c)
+	err := checkContent(c)
+	if err != nil {
+		return err, new(Content)
+	}
 	if len(c.TagsCsvString) > 0 {
 		c.Tags = strings.Split(c.TagsCsvString, ",")
 	}
-	return c
+	return nil, c
 }
