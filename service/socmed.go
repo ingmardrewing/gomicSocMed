@@ -18,28 +18,47 @@ type Content struct {
 
 func NewSocMedService() *restful.WebService {
 	path := "/0.1/gomic/socmed"
+	echo := "/echo"
+	publish := "/all/publish"
+	publishTwitter := "/twitter/publish"
+	publishFacebook := "/facebook/publish"
+	publishTumblr := "/tumblr/publish"
+
+	tumblrCallback := "/tumblr/callback"
+	facebookCallback := "/facebook/callback"
+	facebookGetAccessToken := "/facebook/getAccessToken"
+
 	service := new(restful.WebService)
 	service.
 		Path(path).
 		Consumes(restful.MIME_JSON).
 		Produces(restful.MIME_JSON)
 
-	log.Printf("Rest base path: %s\n", path)
+	log.Printf("Adding POST route: %s\n", path+echo)
+	service.Route(service.POST(echo).Filter(basicAuthenticate).To(Echo))
 
-	service.Route(service.POST("/echo").Filter(basicAuthenticate).To(Echo))
+	log.Printf("Adding POST route: %s\n", path+publish)
+	service.Route(service.POST(publish).Filter(basicAuthenticate).To(Publish))
 
-	service.Route(service.POST("/publish").Filter(basicAuthenticate).To(Publish))
-	service.Route(service.POST("/publishtwitter").Filter(basicAuthenticate).To(PublishTwitter))
-	service.Route(service.POST("/publishfacebook").Filter(basicAuthenticate).To(PublishFacebook))
-	service.Route(service.POST("/publishtumblr").Filter(basicAuthenticate).To(PublishTumblr))
+	log.Printf("Adding POST route: %s\n", path+publishTwitter)
+	service.Route(service.POST(publishTwitter).Filter(basicAuthenticate).To(PublishTwitter))
 
-	service.Route(service.POST("/tumblr/callback").To(TumblrCallback))
+	log.Printf("Adding POST route: %s\n", path+publishFacebook)
+	service.Route(service.POST(publishFacebook).Filter(basicAuthenticate).To(PublishFacebook))
 
-	service.Route(service.POST("/facebook/callback").To(FacebookCallback))
-	service.Route(service.GET("/facebook/callback").To(FacebookCallback))
+	log.Printf("Adding POST route: %s\n", path+publishTumblr)
+	service.Route(service.POST(publishTumblr).Filter(basicAuthenticate).To(PublishTumblr))
 
-	service.Route(service.POST("/facebook/getAccessToken").To(FacebookInit))
-	service.Route(service.GET("/facebook/getAccessToken").To(FacebookInit))
+	log.Printf("Adding POST route: %s\n", path+tumblrCallback)
+	service.Route(service.POST(tumblrCallback).To(TumblrCallback))
+
+	log.Printf("Adding GET and POST route: %s\n", path+facebookCallback)
+	service.Route(service.POST(facebookCallback).To(FacebookCallback))
+	service.Route(service.GET(facebookCallback).To(FacebookCallback))
+
+	log.Printf("Adding GET and POST route: %s\n", path+facebookGetAccessToken)
+	service.Route(service.POST(facebookGetAccessToken).To(FacebookInit))
+	service.Route(service.GET(facebookGetAccessToken).To(FacebookInit))
 
 	return service
 }
@@ -81,9 +100,9 @@ func Publish(request *restful.Request, response *restful.Response) {
 	}
 	tweet(c)
 	postToTumblr(c)
-	postToFacebook(c)
+	result := postToFacebook(c)
 
-	response.WriteEntity(c)
+	response.WriteEntity(result)
 }
 
 func PublishTwitter(request *restful.Request, response *restful.Response) {
@@ -103,9 +122,9 @@ func PublishFacebook(request *restful.Request, response *restful.Response) {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-	postToFacebook(c)
+	result := postToFacebook(c)
 
-	response.WriteEntity(c)
+	response.WriteEntity(result)
 }
 
 func PublishTumblr(request *restful.Request, response *restful.Response) {

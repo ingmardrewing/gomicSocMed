@@ -94,14 +94,14 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 	storeFBAccessToken(string(response2))
 }
 
-func postToFacebook(c *Content) {
+func postToFacebook(c *Content) fb.Result {
 	log.Println("Posting to facebook")
 
 	access_token := retrieveFBAccessTokens()
 	page_id := config.GetFacebookPageId()
 
 	config.GetFacebookPageId()
-	_, err := fb.Post("/"+page_id+"/feed", fb.Params{
+	resp, err := fb.Post("/"+page_id+"/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
 		"caption":      c.Title,
@@ -114,8 +114,10 @@ func postToFacebook(c *Content) {
 	if err != nil {
 		log.Println(err)
 	} else {
-		log.Println("Facebook posting succeeded")
+		log.Println(resp)
 	}
+
+	return resp
 }
 
 func getTagsForFacebook(c *Content) string {

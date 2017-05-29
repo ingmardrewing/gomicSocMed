@@ -14,11 +14,16 @@ func main() {
 	db.Initialize()
 	restful.Add(service.NewSocMedService())
 
-	crt, key := config.GetTlsPaths()
+	port := "443"
+
 	log.Println("Reading crt and key data from files:")
-	log.Println(crt)
-	log.Println(key)
-	err := http.ListenAndServeTLS(":443", crt, key, nil)
+	crt, key := config.GetTlsPaths()
+
+	log.Println("Path to crt file: " + crt)
+	log.Println("Path to key file: " + key)
+	log.Println("Starting to serve via TLS on Port: " + port)
+
+	err := http.ListenAndServeTLS(":"+port, crt, key, nil)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
