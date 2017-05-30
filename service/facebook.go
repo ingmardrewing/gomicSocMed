@@ -109,6 +109,7 @@ func postToFacebook(c *Content) []fb.Result {
 	if ok {
 		parts := strings.Split(str, "_")
 		link := fmt.Sprintf("https://www.facebook.com/%s/posts/%s", parts[0], parts[1])
+
 		resp2 := repostToFacebookAs(link, "fb_drewingde")
 		results = append(results, resp2)
 	}
