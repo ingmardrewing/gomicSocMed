@@ -9,11 +9,15 @@ import (
 	"github.com/ingmardrewing/gomicSocMed/config"
 )
 
-func tweet(c *Content) {
+func tweet(c *Content) int64 {
 	log.Println("Tweeting content")
-	client := getTwitterClient()
+	client := getTwitterClient("twitter_devabode")
 	verify(client)
-	tweetContent(client, c)
+	tweet_id := tweetContent(client, c)
+
+	client2 := getTwitterClient("twitter_ingmardrewing")
+	reTweetContent(client2, tweet_id)
+	return tweet_id
 }
 
 func verify(client *twitter.Client) {
@@ -25,23 +29,40 @@ func verify(client *twitter.Client) {
 	log.Printf("User's ACCOUNT:\n%+v\n", user)
 }
 
-func getTwitterClient() *twitter.Client {
-	cred := oauth1.NewConfig(
-		config.GetTwitterConsumerKey(),
-		config.GetTwitterConsumerSecret())
-	token := oauth1.NewToken(
-		config.GetTwitterAccessToken(),
-		config.GetTwitterAccessTokenSecret())
+func getTwitterClient(client_name string) *twitter.Client {
+	if client_name == "twitter_devabode" {
+		cred := oauth1.NewConfig(
+			config.GetTwitterConsumerKey(),
+			config.GetTwitterConsumerSecret())
 
-	httpClient := cred.Client(oauth1.NoContext, token)
-	return twitter.NewClient(httpClient)
+		token := oauth1.NewToken(
+			config.GetTwitterAccessToken(),
+			config.GetTwitterAccessTokenSecret())
+
+		client := cred.Client(oauth1.NoContext, token)
+		return twitter.NewClient(client)
+	}
+
+	cred := oauth1.NewConfig(
+		config.GetTwitterRepeatConsumerKey(),
+		config.GetTwitterRepeatConsumerSecret())
+
+	token := oauth1.NewToken(
+		config.GetTwitterRepeatAccessToken(),
+		config.GetTwitterRepeatAccessTokenSecret())
+
+	client := cred.Client(oauth1.NoContext, token)
+	return twitter.NewClient(client)
 }
 
-func tweetContent(client *twitter.Client, c *Content) {
-	if config.IsProd() {
-		tweet, _, _ := client.Statuses.Update(getTweetText(c), nil)
-		log.Printf("Posted tweet \n%v\n", tweet)
-	}
+func tweetContent(client *twitter.Client, c *Content) int64 {
+	tweet, _, _ := client.Statuses.Update(getTweetText(c), nil)
+	return tweet.ID
+}
+
+func reTweetContent(client *twitter.Client, tweet_id int64) int64 {
+	tweet, _, _ := client.Statuses.Retweet(tweet_id, nil)
+	return tweet.ID
 }
 
 func getTweetText(c *Content) string {

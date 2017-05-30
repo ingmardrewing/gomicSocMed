@@ -111,9 +111,9 @@ func PublishTwitter(request *restful.Request, response *restful.Response) {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-	tweet(c)
+	tweet_id := tweet(c)
 
-	response.WriteEntity(c)
+	response.WriteEntity(tweet_id)
 }
 
 func PublishFacebook(request *restful.Request, response *restful.Response) {

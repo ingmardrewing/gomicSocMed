@@ -10,6 +10,30 @@ func GetPasswordHashForUser(user string) string {
 	return os.Getenv("GOMIC_BASIC_AUTH_PASS_HASH")
 }
 
+func GetTwitterRepeatConsumerKey() string {
+	s := os.Getenv("TWITTER_REPEAT_CONSUMER_KEY")
+	fmt.Println(s)
+	return s
+}
+
+func GetTwitterRepeatConsumerSecret() string {
+	s := os.Getenv("TWITTER_REPEAT_CONSUMER_SECRET")
+	fmt.Println(s)
+	return s
+}
+
+func GetTwitterRepeatAccessToken() string {
+	s := os.Getenv("TWITTER_REPEAT_ACCESS_TOKEN")
+	fmt.Println(s)
+	return s
+}
+
+func GetTwitterRepeatAccessTokenSecret() string {
+	s := os.Getenv("TWITTER_REPEAT_ACCESS_TOKEN_SECRET")
+	fmt.Println(s)
+	return s
+}
+
 func GetTwitterConsumerKey() string {
 	s := os.Getenv("TWITTER_ORIGIN_CONSUMER_KEY")
 	fmt.Println(s)
