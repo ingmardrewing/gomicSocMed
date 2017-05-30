@@ -57,8 +57,8 @@ func NewSocMedService() *restful.WebService {
 	service.Route(service.GET(facebookCallback).To(FacebookCallback))
 
 	log.Printf("Adding GET and POST route: %s\n", path+facebookGetAccessToken)
-	service.Route(service.POST(facebookGetAccessToken).To(FacebookInit))
-	service.Route(service.GET(facebookGetAccessToken).To(FacebookInit))
+	service.Route(service.POST(facebookGetAccessToken).To(FacebookGetAccessToken))
+	service.Route(service.GET(facebookGetAccessToken).To(FacebookGetAccessToken))
 
 	return service
 }

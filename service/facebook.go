@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -53,7 +54,7 @@ func getRandomString(n int) string {
 	return string(b)
 }
 
-func FacebookInit(request *restful.Request, response *restful.Response) {
+func FacebookGetAccessToken(request *restful.Request, response *restful.Response) {
 	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
 	if err != nil {
 		log.Fatal("Parse: ", err)
@@ -91,17 +92,35 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 	response2, _ := ioutil.ReadAll(resp.Body)
 
-	storeFBAccessToken(string(response2))
+	log.Println(string(response2))
+
+	////storeFBAccessToken(string(response2))
 }
 
-func postToFacebook(c *Content) fb.Result {
+func postToFacebook(c *Content) []fb.Result {
 	log.Println("Posting to facebook")
 
-	access_token := retrieveFBAccessTokens()
-	page_id := config.GetFacebookPageId()
+	results := []fb.Result{}
 
-	config.GetFacebookPageId()
-	resp, err := fb.Post("/"+page_id+"/feed", fb.Params{
+	resp1 := postToFacebookAs(c, "fb_devabode")
+	results = append(results, resp1)
+
+	str, ok := resp1.Get("id").(string)
+	if ok {
+		parts := strings.Split(str, "_")
+		link := fmt.Sprintf("https://www.facebook.com/%s/posts/%s", parts[0], parts[1])
+		resp2 := repostToFacebookAs(link, "fb_drewingde")
+		results = append(results, resp2)
+	}
+
+	return results
+}
+
+func postToFacebookAs(c *Content, name string) fb.Result {
+	access_token := db.GetToken(name)
+	id := db.GetId(name)
+
+	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
 		"caption":      c.Title,
@@ -116,7 +135,24 @@ func postToFacebook(c *Content) fb.Result {
 	} else {
 		log.Println(resp)
 	}
+	return resp
+}
 
+func repostToFacebookAs(link string, name string) fb.Result {
+
+	access_token := db.GetToken(name)
+	id := db.GetId(name)
+
+	resp, err := fb.Post("/"+id+"/feed", fb.Params{
+		"type":         "link",
+		"link":         link,
+		"access_token": access_token,
+	})
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(resp)
+	}
 	return resp
 }
 
@@ -137,13 +173,9 @@ func storeFBAccessToken(token string) {
 	// TODO parse json properly, store all tokens
 	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
 	matches := re.FindStringSubmatch(token)
-	if db.TokenExists("fb_devabode") {
-		db.UpdateToken("fb_devabode", matches[1])
+	if db.TokenExists("fb_drewingde") {
+		db.UpdateToken("fb_drewingde", matches[1])
 	} else {
-		db.InsertToken("fb_devabode", matches[1])
+		db.InsertToken("fb_drewingde", matches[1])
 	}
-}
-
-func retrieveFBAccessTokens() string {
-	return db.GetToken("fb_devabode")
 }

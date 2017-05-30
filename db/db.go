@@ -46,6 +46,16 @@ func GetToken(key string) string {
 	return token
 }
 
+func GetId(key string) string {
+
+	var socmed_id string
+	err := db.QueryRow("SELECT socmed_id FROM tokens WHERE tkey=?", key).Scan(&socmed_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return socmed_id
+}
+
 func TokenExists(key string) bool {
 	var amount string
 	err := db.QueryRow("SELECT count(*) FROM tokens WHERE tkey=?", key).Scan(&amount)
