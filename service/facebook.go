@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	restful "github.com/emicklei/go-restful"
 	fb "github.com/huandu/facebook"
@@ -161,9 +160,6 @@ func getTagsForFacebook(c *Content) string {
 	txt := ""
 
 	for _, tag := range c.Tags {
-		if utf8.RuneCountInString(txt+" #"+tag) > 140 {
-			return txt
-		}
 		txt += " #" + tag
 	}
 
