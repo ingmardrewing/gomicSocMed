@@ -77,9 +77,24 @@ func basicAuthenticate(request *restful.Request, response *restful.Response, cha
 
 func authenticate(req *restful.Request) error {
 	user, pass, _ := req.Request.BasicAuth()
+	log.Println("request from user: ", user)
+	/*log.Println("pass: ", pass)*/
 	given_pass := []byte(pass)
-	stored_hash := []byte(config.GetPasswordHashForUser(user))
-	//hash, _ := bcrypt.GenerateFromPassword(given_pass, coast)
+
+	existing_hash := config.GetPasswordHashForUser(user)
+	stored_hash := []byte(existing_hash)
+
+	/*
+		cost := 4
+		hash, err := bcrypt.GenerateFromPassword(given_pass, cost)
+		if err != nil {
+			log.Fatalln("error generating password:", err)
+		}
+
+		log.Println("existing hash:", existing_hash)
+		log.Println("hashed new pw:", string(hash))
+	*/
+
 	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
 }
 

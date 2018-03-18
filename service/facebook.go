@@ -38,6 +38,7 @@ var (
 )
 
 func getRandomString(n int) string {
+	log.Println("getRandomString")
 	b := make([]byte, n)
 	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
 		if remain == 0 {
@@ -54,6 +55,7 @@ func getRandomString(n int) string {
 }
 
 func FacebookGetAccessToken(request *restful.Request, response *restful.Response) {
+	log.Println("FacebookGetAccessToken")
 	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
 	if err != nil {
 		log.Fatal("Parse: ", err)
@@ -73,6 +75,7 @@ func FacebookGetAccessToken(request *restful.Request, response *restful.Response
 }
 
 func FacebookCallback(r *restful.Request, response *restful.Response) {
+	log.Println("FacebookCallback")
 	code := r.Request.FormValue("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
@@ -117,7 +120,9 @@ func postToFacebook(c *Content) []fb.Result {
 }
 
 func postToFacebookAs(c *Content, name string) fb.Result {
+	log.Println("postToFacebook")
 	access_token := db.GetToken(name)
+	log.Println("got fb access token", access_token)
 	id := db.GetId(name)
 
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
@@ -139,7 +144,7 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 }
 
 func repostToFacebookAs(link string, name string) fb.Result {
-
+	log.Println("repostToFacebookAs")
 	access_token := db.GetToken(name)
 	id := db.GetId(name)
 
@@ -157,6 +162,7 @@ func repostToFacebookAs(link string, name string) fb.Result {
 }
 
 func getTagsForFacebook(c *Content) string {
+	log.Println("getTagsForFacebook")
 	txt := ""
 
 	for _, tag := range c.Tags {
@@ -167,6 +173,7 @@ func getTagsForFacebook(c *Content) string {
 }
 
 func storeFBAccessToken(token string) {
+	log.Println("storeFBAccessToken")
 	// TODO parse json properly, store all tokens
 	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
 	matches := re.FindStringSubmatch(token)
