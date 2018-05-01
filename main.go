@@ -12,7 +12,7 @@ func main() {
 	restful.Add(NewSocMedService())
 	store.Initialize()
 
-	port := "8880"
+	port := "8443"
 
 	/*
 		port := "443"
