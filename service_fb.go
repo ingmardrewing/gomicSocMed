@@ -1,4 +1,4 @@
-package service
+package main
 
 import (
 	"fmt"
@@ -13,8 +13,7 @@ import (
 
 	restful "github.com/emicklei/go-restful"
 	fb "github.com/huandu/facebook"
-	"github.com/ingmardrewing/gomicSocMed/config"
-	"github.com/ingmardrewing/gomicSocMed/db"
+	store "github.com/ingmardrewing/fsKeyValueStore"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 )
@@ -28,9 +27,9 @@ const (
 
 var (
 	oauthConf = &oauth2.Config{
-		ClientID:     config.GetFacebookApplicationId(),
-		ClientSecret: config.GetFacebookApplicationSecret(),
-		RedirectURL:  config.GetFacebookCallbackUrl(),
+		ClientID:     env(FB_APPLICATION_ID),
+		ClientSecret: env(FB_APPLICATION_SECRET),
+		RedirectURL:  env(FB_CALLBACK_URL),
 		Scopes:       []string{"public_profile"},
 		Endpoint:     facebook.Endpoint,
 	}
@@ -38,6 +37,7 @@ var (
 )
 
 func getRandomString(n int) string {
+	log.Println("getRandomString")
 	b := make([]byte, n)
 	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
 		if remain == 0 {
@@ -54,6 +54,7 @@ func getRandomString(n int) string {
 }
 
 func FacebookGetAccessToken(request *restful.Request, response *restful.Response) {
+	log.Println("FacebookGetAccessToken")
 	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
 	if err != nil {
 		log.Fatal("Parse: ", err)
@@ -73,6 +74,7 @@ func FacebookGetAccessToken(request *restful.Request, response *restful.Response
 }
 
 func FacebookCallback(r *restful.Request, response *restful.Response) {
+	log.Println("FacebookCallback")
 	code := r.Request.FormValue("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
@@ -101,7 +103,7 @@ func postToFacebook(c *Content) []fb.Result {
 
 	results := []fb.Result{}
 
-	resp1 := postToFacebookAs(c, "fb_devabode")
+	resp1 := postToFacebookAs(c, "fb_devabode_poster")
 	results = append(results, resp1)
 
 	str, ok := resp1.Get("id").(string)
@@ -117,8 +119,16 @@ func postToFacebook(c *Content) []fb.Result {
 }
 
 func postToFacebookAs(c *Content, name string) fb.Result {
-	access_token := db.GetToken(name)
-	id := db.GetId(name)
+	log.Println("postToFacebook")
+	access_token, err := store.Read(name + "_token")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("got fb access token", access_token)
+	id, err := store.Read(name + "_id")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
@@ -139,9 +149,16 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 }
 
 func repostToFacebookAs(link string, name string) fb.Result {
+	log.Println("repostToFacebookAs")
+	access_token, err := store.Read(name + "_token")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	access_token := db.GetToken(name)
-	id := db.GetId(name)
+	id, err := store.Read(name + "_id")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
@@ -157,6 +174,7 @@ func repostToFacebookAs(link string, name string) fb.Result {
 }
 
 func getTagsForFacebook(c *Content) string {
+	log.Println("getTagsForFacebook")
 	txt := ""
 
 	for _, tag := range c.Tags {
@@ -167,12 +185,10 @@ func getTagsForFacebook(c *Content) string {
 }
 
 func storeFBAccessToken(token string) {
+	log.Println("storeFBAccessToken")
+
 	// TODO parse json properly, store all tokens
 	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
 	matches := re.FindStringSubmatch(token)
-	if db.TokenExists("fb_drewingde") {
-		db.UpdateToken("fb_drewingde", matches[1])
-	} else {
-		db.InsertToken("fb_drewingde", matches[1])
-	}
+	store.CreateIfNonExistentElseUpdate("fb_drewingde_token", matches[1])
 }

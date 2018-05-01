@@ -1,4 +1,4 @@
-package service
+package main
 
 import (
 	"log"
@@ -6,18 +6,45 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/ingmardrewing/gomicSocMed/config"
 )
 
 func tweet(c *Content) int64 {
 	log.Println("Tweeting content")
-	client := getTwitterClient("twitter_devabode")
+	client := getOriginClient()
 	verify(client)
 	tweet_id := tweetContent(client, c)
 
-	client2 := getTwitterClient("twitter_ingmardrewing")
+	client2 := getRepeatClient()
 	reTweetContent(client2, tweet_id)
 	return tweet_id
+}
+
+func getOriginClient() *twitter.Client {
+	return getConfiguredTwitterClient(
+		env(TWITTER_ORIGIN_CONSUMER_KEY),
+		env(TWITTER_ORIGIN_CONSUMER_SECRET),
+		env(TWITTER_ORIGIN_ACCESS_TOKEN),
+		env(TWITTER_ORIGIN_ACCESS_TOKEN_SECRET))
+}
+
+func getRepeatClient() *twitter.Client {
+	return getConfiguredTwitterClient(
+		env(TWITTER_REPEAT_CONSUMER_KEY),
+		env(TWITTER_REPEAT_CONSUMER_SECRET),
+		env(TWITTER_REPEAT_ACCESS_TOKEN),
+		env(TWITTER_REPEAT_ACCESS_TOKEN_SECRET))
+}
+
+func getConfiguredTwitterClient(
+	consumerKey,
+	consumerSecret,
+	accessToken,
+	accessTokenSecret string) *twitter.Client {
+
+	cred := oauth1.NewConfig(consumerKey, consumerSecret)
+	token := oauth1.NewToken(accessToken, accessTokenSecret)
+	client := cred.Client(oauth1.NoContext, token)
+	return twitter.NewClient(client)
 }
 
 func verify(client *twitter.Client) {
@@ -27,32 +54,6 @@ func verify(client *twitter.Client) {
 	}
 	user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
 	log.Printf("User's ACCOUNT:\n%+v\n", user)
-}
-
-func getTwitterClient(client_name string) *twitter.Client {
-	if client_name == "twitter_devabode" {
-		cred := oauth1.NewConfig(
-			config.GetTwitterConsumerKey(),
-			config.GetTwitterConsumerSecret())
-
-		token := oauth1.NewToken(
-			config.GetTwitterAccessToken(),
-			config.GetTwitterAccessTokenSecret())
-
-		client := cred.Client(oauth1.NoContext, token)
-		return twitter.NewClient(client)
-	}
-
-	cred := oauth1.NewConfig(
-		config.GetTwitterRepeatConsumerKey(),
-		config.GetTwitterRepeatConsumerSecret())
-
-	token := oauth1.NewToken(
-		config.GetTwitterRepeatAccessToken(),
-		config.GetTwitterRepeatAccessTokenSecret())
-
-	client := cred.Client(oauth1.NoContext, token)
-	return twitter.NewClient(client)
 }
 
 func tweetContent(client *twitter.Client, c *Content) int64 {

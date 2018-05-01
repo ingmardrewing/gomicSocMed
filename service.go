@@ -1,14 +1,14 @@
-package service
+package main
 
 import (
 	"errors"
 	"log"
 	"strings"
 
+	fb "github.com/huandu/facebook"
 	"golang.org/x/crypto/bcrypt"
 
 	restful "github.com/emicklei/go-restful"
-	"github.com/ingmardrewing/gomicSocMed/config"
 )
 
 type Content struct {
@@ -21,12 +21,12 @@ func NewSocMedService() *restful.WebService {
 	echo := "/echo"
 	publish := "/all/publish"
 	publishTwitter := "/twitter/publish"
-	publishFacebook := "/facebook/publish"
+	//publishFacebook := "/facebook/publish"
 	publishTumblr := "/tumblr/publish"
 
 	tumblrCallback := "/tumblr/callback"
-	facebookCallback := "/facebook/callback"
-	facebookGetAccessToken := "/facebook/getAccessToken"
+	//facebookCallback := "/facebook/callback"
+	//facebookGetAccessToken := "/facebook/getAccessToken"
 
 	service := new(restful.WebService)
 	service.
@@ -43,8 +43,10 @@ func NewSocMedService() *restful.WebService {
 	log.Printf("Adding POST route: %s\n", path+publishTwitter)
 	service.Route(service.POST(publishTwitter).Filter(basicAuthenticate).To(PublishTwitter))
 
-	log.Printf("Adding POST route: %s\n", path+publishFacebook)
-	service.Route(service.POST(publishFacebook).Filter(basicAuthenticate).To(PublishFacebook))
+	/*
+		log.Printf("Adding POST route: %s\n", path+publishFacebook)
+		service.Route(service.POST(publishFacebook).Filter(basicAuthenticate).To(PublishFacebook))
+	*/
 
 	log.Printf("Adding POST route: %s\n", path+publishTumblr)
 	service.Route(service.POST(publishTumblr).Filter(basicAuthenticate).To(PublishTumblr))
@@ -52,13 +54,15 @@ func NewSocMedService() *restful.WebService {
 	log.Printf("Adding POST route: %s\n", path+tumblrCallback)
 	service.Route(service.POST(tumblrCallback).To(TumblrCallback))
 
-	log.Printf("Adding GET and POST route: %s\n", path+facebookCallback)
-	service.Route(service.POST(facebookCallback).To(FacebookCallback))
-	service.Route(service.GET(facebookCallback).To(FacebookCallback))
+	/*
+		log.Printf("Adding GET and POST route: %s\n", path+facebookCallback)
+		service.Route(service.POST(facebookCallback).To(FacebookCallback))
+		service.Route(service.GET(facebookCallback).To(FacebookCallback))
 
-	log.Printf("Adding GET and POST route: %s\n", path+facebookGetAccessToken)
-	service.Route(service.POST(facebookGetAccessToken).To(FacebookGetAccessToken))
-	service.Route(service.GET(facebookGetAccessToken).To(FacebookGetAccessToken))
+		log.Printf("Adding GET and POST route: %s\n", path+facebookGetAccessToken)
+		service.Route(service.POST(facebookGetAccessToken).To(FacebookGetAccessToken))
+		service.Route(service.GET(facebookGetAccessToken).To(FacebookGetAccessToken))
+	*/
 
 	return service
 }
@@ -77,9 +81,24 @@ func basicAuthenticate(request *restful.Request, response *restful.Response, cha
 
 func authenticate(req *restful.Request) error {
 	user, pass, _ := req.Request.BasicAuth()
+	log.Println("request from user: ", user)
+	/*log.Println("pass: ", pass)*/
 	given_pass := []byte(pass)
-	stored_hash := []byte(config.GetPasswordHashForUser(user))
-	//hash, _ := bcrypt.GenerateFromPassword(given_pass, coast)
+
+	existing_hash := env(GOMIC_BASIC_AUTH_PASS_HASH)
+	stored_hash := []byte(existing_hash)
+
+	/*
+		cost := 4
+		hash, err := bcrypt.GenerateFromPassword(given_pass, cost)
+		if err != nil {
+			log.Fatalln("error generating password:", err)
+		}
+
+		log.Println("existing hash:", existing_hash)
+		log.Println("hashed new pw:", string(hash))
+	*/
+
 	return bcrypt.CompareHashAndPassword(stored_hash, given_pass)
 }
 
@@ -100,8 +119,8 @@ func Publish(request *restful.Request, response *restful.Response) {
 	}
 	tweet(c)
 	postToTumblr(c)
-	result := postToFacebook(c)
 
+	result := []fb.Result{}
 	response.WriteEntity(result)
 }
 
@@ -116,6 +135,7 @@ func PublishTwitter(request *restful.Request, response *restful.Response) {
 	response.WriteEntity(tweet_id)
 }
 
+/*
 func PublishFacebook(request *restful.Request, response *restful.Response) {
 	err, c := readContent(request)
 	if err != nil {
@@ -124,8 +144,10 @@ func PublishFacebook(request *restful.Request, response *restful.Response) {
 	}
 	result := postToFacebook(c)
 
+	result := []fb.Result{}
 	response.WriteEntity(result)
 }
+*/
 
 func PublishTumblr(request *restful.Request, response *restful.Response) {
 	err, c := readContent(request)

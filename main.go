@@ -5,26 +5,28 @@ import (
 	"net/http"
 
 	restful "github.com/emicklei/go-restful"
-	"github.com/ingmardrewing/gomicSocMed/config"
-	"github.com/ingmardrewing/gomicSocMed/db"
-	"github.com/ingmardrewing/gomicSocMed/service"
+	store "github.com/ingmardrewing/fsKeyValueStore"
 )
 
 func main() {
-	db.Initialize()
-	restful.Add(service.NewSocMedService())
+	restful.Add(NewSocMedService())
+	store.Initialize()
 
 	port := "8443"
 
-	log.Println("Reading crt and key data from files:")
-	crt, key := config.GetTlsPaths()
+	/*
+		port := "443"
+		log.Println("Reading crt and key data from files:")
+		crt, key := config.GetTlsPaths()
 
-	log.Println("Path to crt file: " + crt)
-	log.Println("Path to key file: " + key)
-	log.Println("Starting to serve via TLS on Port: " + port)
+		log.Println("Path to crt file: " + crt)
+		log.Println("Path to key file: " + key)
+		log.Println("Starting to serve via TLS on Port: " + port)
 
-	//err := http.ListenAndServeTLS(":"+port, crt, key, nil)
+		err := http.ListenAndServeTLS(":"+port, crt, key, nil)
+	*/
 	err := http.ListenAndServe(":"+port, nil)
+
 	if err != nil {
 		log.Fatal(err.Error())
 	}
