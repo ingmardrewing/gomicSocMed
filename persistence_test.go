@@ -10,14 +10,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	setup()
 	code := m.Run()
 	tearDown()
 	os.Exit(code)
-}
-
-func setup() {
-	//conf = staticPersistence.ReadConfig("testResources/", "configNew.json")
 }
 
 func tearDown() {
