@@ -1,11 +1,10 @@
-package service
+package main
 
 import (
 	"log"
 
 	"github.com/MariaTerzieva/gotumblr"
 	restful "github.com/emicklei/go-restful"
-	"github.com/ingmardrewing/gomicSocMed/config"
 )
 
 func TumblrCallback(request *restful.Request, response *restful.Response) {
@@ -17,9 +16,9 @@ func postToTumblr(c *Content) {
 	client := getTumblrClient()
 	mappedContent := getMappedContent(c)
 
-	if config.IsProd() {
+	if IsProd() {
 		err := client.CreatePhoto(
-			config.GetTumblrBlogName(),
+			env(GOMIC_TUMBLR_BLOG_NAME),
 			mappedContent)
 		if err != nil {
 			log.Println(err)
@@ -40,10 +39,10 @@ func getMappedContent(c *Content) map[string]string {
 
 func getTumblrClient() *gotumblr.TumblrRestClient {
 	return gotumblr.NewTumblrRestClient(
-		config.GetTumblrConsumerKey(),
-		config.GetTumblrConsumerSecret(),
-		config.GetTumblrToken(),
-		config.GetTumblrTokenSecret(),
-		config.GetTumblrCallbackUrl(),
+		env(GOMIC_TUMBLR_CONSUMER_KEY),
+		env(GOMIC_TUMBLR_CONSUMER_SECRET),
+		env(GOMIC_TUMBLR_TOKEN),
+		env(GOMIC_TUMBLR_TOKEN_SECRET),
+		env(GOMIC_TUMBLR_CALLBACK_URL),
 		"http://api.tumblr.com")
 }

@@ -5,14 +5,12 @@ import (
 	"net/http"
 
 	restful "github.com/emicklei/go-restful"
-	"github.com/ingmardrewing/gomicSocMed/db"
-	"github.com/ingmardrewing/gomicSocMed/service"
+	store "github.com/ingmardrewing/fsKeyValueStore"
 )
 
 func main() {
-	db.Initialize()
-	db.Check()
-	restful.Add(service.NewSocMedService())
+	restful.Add(NewSocMedService())
+	store.Initialize()
 
 	port := "8880"
 

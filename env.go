@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"fmt"
@@ -35,81 +35,8 @@ const (
 	TLS_KEY_PATH                       = "TLS_KEY_PATH"
 )
 
-func GetPasswordHashForUser(user string) string {
-	// TODO impl. user dependent hash retrieval
-	return os.Getenv(GOMIC_BASIC_AUTH_PASS_HASH)
-}
-
-func GetTwitterRepeatConsumerKey() string {
-	return os.Getenv(TWITTER_REPEAT_CONSUMER_KEY)
-}
-
-func GetTwitterRepeatConsumerSecret() string {
-	return os.Getenv(TWITTER_REPEAT_CONSUMER_SECRET)
-}
-
-func GetTwitterRepeatAccessToken() string {
-	return os.Getenv(TWITTER_REPEAT_ACCESS_TOKEN)
-}
-
-func GetTwitterRepeatAccessTokenSecret() string {
-	return os.Getenv(TWITTER_REPEAT_ACCESS_TOKEN_SECRET)
-}
-
-func GetTwitterConsumerKey() string {
-	return os.Getenv(TWITTER_ORIGIN_CONSUMER_KEY)
-}
-
-func GetTwitterConsumerSecret() string {
-	return os.Getenv(TWITTER_ORIGIN_CONSUMER_SECRET)
-}
-
-func GetTwitterAccessToken() string {
-	return os.Getenv(TWITTER_ORIGIN_ACCESS_TOKEN)
-}
-
-func GetTwitterAccessTokenSecret() string {
-	return os.Getenv(TWITTER_ORIGIN_ACCESS_TOKEN_SECRET)
-}
-
-func GetTumblrCallbackUrl() string {
-	return os.Getenv(GOMIC_TUMBLR_CALLBACK_URL)
-}
-
-func GetTumblrBlogName() string {
-	return os.Getenv(GOMIC_TUMBLR_BLOG_NAME)
-}
-
-func GetTumblrConsumerKey() string {
-	return os.Getenv(GOMIC_TUMBLR_CONSUMER_KEY)
-}
-
-func GetTumblrConsumerSecret() string {
-	return os.Getenv(GOMIC_TUMBLR_CONSUMER_SECRET)
-}
-
-func GetTumblrToken() string {
-	return os.Getenv(GOMIC_TUMBLR_TOKEN)
-}
-
-func GetTumblrTokenSecret() string {
-	return os.Getenv(GOMIC_TUMBLR_TOKEN_SECRET)
-}
-
-func GetFacebookPageId() string {
-	return os.Getenv(FB_DEVABODE_ID)
-}
-
-func GetFacebookApplicationId() string {
-	return os.Getenv(FB_APPLICATION_ID)
-}
-
-func GetFacebookApplicationSecret() string {
-	return os.Getenv(FB_APPLICATION_SECRET)
-}
-
-func GetFacebookCallbackUrl() string {
-	return os.Getenv(FB_CALLBACK_URL)
+func env(key string) string {
+	return os.Getenv(key)
 }
 
 func IsProd() bool {
