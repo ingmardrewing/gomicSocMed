@@ -45,6 +45,7 @@ func (fp *filePersistence) CreateIfNonExistentElseUpdate(key, value string) erro
 		if err := fp.Update(key, value); err != nil {
 			return err
 		}
+		return nil
 	}
 	if err := fp.Create(key, value); err != nil {
 		return err
