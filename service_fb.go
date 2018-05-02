@@ -14,6 +14,7 @@ import (
 	restful "github.com/emicklei/go-restful"
 	fb "github.com/huandu/facebook"
 	store "github.com/ingmardrewing/fsKeyValueStore"
+	shared "github.com/ingmardrewing/gomicSocMedShared"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 )
@@ -27,9 +28,9 @@ const (
 
 var (
 	oauthConf = &oauth2.Config{
-		ClientID:     env(FB_APPLICATION_ID),
-		ClientSecret: env(FB_APPLICATION_SECRET),
-		RedirectURL:  env(FB_CALLBACK_URL),
+		ClientID:     shared.Env(shared.FB_APPLICATION_ID),
+		ClientSecret: shared.Env(shared.FB_APPLICATION_SECRET),
+		RedirectURL:  shared.Env(shared.FB_CALLBACK_URL),
 		Scopes:       []string{"public_profile"},
 		Endpoint:     facebook.Endpoint,
 	}

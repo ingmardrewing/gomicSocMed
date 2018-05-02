@@ -5,6 +5,7 @@ import (
 
 	"github.com/MariaTerzieva/gotumblr"
 	restful "github.com/emicklei/go-restful"
+	shared "github.com/ingmardrewing/gomicSocMedShared"
 )
 
 func TumblrCallback(request *restful.Request, response *restful.Response) {
@@ -16,9 +17,9 @@ func postToTumblr(c *Content) {
 	client := getTumblrClient()
 	mappedContent := getMappedContent(c)
 
-	if IsProd() {
+	if shared.IsProd() {
 		err := client.CreatePhoto(
-			env(GOMIC_TUMBLR_BLOG_NAME),
+			shared.Env(shared.GOMIC_TUMBLR_BLOG_NAME),
 			mappedContent)
 		if err != nil {
 			log.Println(err)
@@ -39,10 +40,10 @@ func getMappedContent(c *Content) map[string]string {
 
 func getTumblrClient() *gotumblr.TumblrRestClient {
 	return gotumblr.NewTumblrRestClient(
-		env(GOMIC_TUMBLR_CONSUMER_KEY),
-		env(GOMIC_TUMBLR_CONSUMER_SECRET),
-		env(GOMIC_TUMBLR_TOKEN),
-		env(GOMIC_TUMBLR_TOKEN_SECRET),
-		env(GOMIC_TUMBLR_CALLBACK_URL),
+		shared.Env(shared.GOMIC_TUMBLR_CONSUMER_KEY),
+		shared.Env(shared.GOMIC_TUMBLR_CONSUMER_SECRET),
+		shared.Env(shared.GOMIC_TUMBLR_TOKEN),
+		shared.Env(shared.GOMIC_TUMBLR_TOKEN_SECRET),
+		shared.Env(shared.GOMIC_TUMBLR_CALLBACK_URL),
 		"http://api.tumblr.com")
 }

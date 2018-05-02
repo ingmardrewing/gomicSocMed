@@ -9,11 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	restful "github.com/emicklei/go-restful"
+	shared "github.com/ingmardrewing/gomicSocMedShared"
 )
 
 type Content struct {
-	Link, ImgUrl, Title, TagsCsvString, Description string
-	Tags                                            []string
+	shared.Content
 }
 
 func NewSocMedService() *restful.WebService {
@@ -85,7 +85,7 @@ func authenticate(req *restful.Request) error {
 	/*log.Println("pass: ", pass)*/
 	given_pass := []byte(pass)
 
-	existing_hash := env(GOMIC_BASIC_AUTH_PASS_HASH)
+	existing_hash := shared.Env(shared.GOMIC_BASIC_AUTH_PASS_HASH)
 	stored_hash := []byte(existing_hash)
 
 	/*
