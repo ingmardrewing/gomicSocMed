@@ -8,10 +8,15 @@ import (
 
 	restful "github.com/emicklei/go-restful"
 	store "github.com/ingmardrewing/fsKeyValueStore"
+	shared "github.com/ingmardrewing/gomicSocMedShared"
+)
+
+const (
+	PORT = "8443"
 )
 
 func main() {
-	logfile := path.Join(env(GOMIC_PATH_TO_LOG), "log")
+	logfile := path.Join(shared.Env(shared.GOMIC_PATH_TO_LOG), "log")
 	f, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
@@ -22,21 +27,21 @@ func main() {
 	restful.Add(NewSocMedService())
 	store.Initialize()
 
-	port := "8443"
-
 	/*
+		crt := shared.Env(shared.TLS_CERT_PATH)
+		key := shared.Env(shared.TLS_KEY_PATH)
 		port := "443"
 		log.Println("Reading crt and key data from files:")
 		crt, key := config.GetTlsPaths()
 
 		log.Println("Path to crt file: " + crt)
 		log.Println("Path to key file: " + key)
-		log.Println("Starting to serve via TLS on Port: " + port)
+		log.Println("Starting to serve via TLS on Port: " + PORT)
 
-		err := http.ListenAndServeTLS(":"+port, crt, key, nil)
+		err := http.ListenAndServeTLS(":"+PORT, crt, key, nil)
 	*/
-	log.Println("Listening on port", port, "via regular http")
-	err = http.ListenAndServe(":"+port, nil)
+	log.Println("Listening on port", PORT, "via regular http")
+	err = http.ListenAndServe(":"+PORT, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())

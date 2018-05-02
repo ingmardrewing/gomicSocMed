@@ -6,6 +6,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	shared "github.com/ingmardrewing/gomicSocMedShared"
 )
 
 func tweet(c *Content) int64 {
@@ -21,18 +22,18 @@ func tweet(c *Content) int64 {
 
 func getOriginClient() *twitter.Client {
 	return getConfiguredTwitterClient(
-		env(TWITTER_ORIGIN_CONSUMER_KEY),
-		env(TWITTER_ORIGIN_CONSUMER_SECRET),
-		env(TWITTER_ORIGIN_ACCESS_TOKEN),
-		env(TWITTER_ORIGIN_ACCESS_TOKEN_SECRET))
+		shared.Env(shared.TWITTER_ORIGIN_CONSUMER_KEY),
+		shared.Env(shared.TWITTER_ORIGIN_CONSUMER_SECRET),
+		shared.Env(shared.TWITTER_ORIGIN_ACCESS_TOKEN),
+		shared.Env(shared.TWITTER_ORIGIN_ACCESS_TOKEN_SECRET))
 }
 
 func getRepeatClient() *twitter.Client {
 	return getConfiguredTwitterClient(
-		env(TWITTER_REPEAT_CONSUMER_KEY),
-		env(TWITTER_REPEAT_CONSUMER_SECRET),
-		env(TWITTER_REPEAT_ACCESS_TOKEN),
-		env(TWITTER_REPEAT_ACCESS_TOKEN_SECRET))
+		shared.Env(shared.TWITTER_REPEAT_CONSUMER_KEY),
+		shared.Env(shared.TWITTER_REPEAT_CONSUMER_SECRET),
+		shared.Env(shared.TWITTER_REPEAT_ACCESS_TOKEN),
+		shared.Env(shared.TWITTER_REPEAT_ACCESS_TOKEN_SECRET))
 }
 
 func getConfiguredTwitterClient(
