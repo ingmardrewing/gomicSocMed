@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -17,16 +18,21 @@ type Content struct {
 }
 
 func NewSocMedService() *restful.WebService {
-	path := "/0.1/gomic/socmed"
-	echo := "/echo"
-	publish := "/all/publish"
-	publishTwitter := "/twitter/publish"
-	//publishFacebook := "/facebook/publish"
-	publishTumblr := "/tumblr/publish"
+	path := fmt.Sprintf("/%s/%s",
+		shared.CURRENT_REST_VERSION,
+		shared.REST_BASE_PATH)
 
-	tumblrCallback := "/tumblr/callback"
-	//facebookCallback := "/facebook/callback"
-	//facebookGetAccessToken := "/facebook/getAccessToken"
+	echo := shared.REST_PATH_ECHO
+	publish := shared.REST_PATH_PUBLISH_ALL
+
+	publishTwitter := shared.REST_PATH_PUBLISH_TWITTER
+
+	publishTumblr := shared.REST_PATH_PUBLISH_TUMBLER
+	tumblrCallback := shared.REST_PATH_PUBLISH_TUMBLER_CALLBACK
+
+	//publishFacebook := shared.REST_PATH_PUBLISH_FACEBOOK
+	//facebookCallback := shared.REST_PATH_FACEBOOK_CALLBACK
+	//facebookGetAccessToken := shared.REST_PATH_FACEBOOK_GET_ACCESS_TOKEN
 
 	service := new(restful.WebService)
 	service.
