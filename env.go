@@ -1,11 +1,9 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
 const (
+	GOMIC_PATH_TO_LOG                  = "GOMIC_PATH_TO_LOG"
 	GOMIC_BASIC_AUTH_PASS_HASH         = "GOMIC_BASIC_AUTH_PASS_HASH"
 	TWITTER_REPEAT_CONSUMER_KEY        = "TWITTER_REPEAT_CONSUMER_KEY"
 	TWITTER_REPEAT_CONSUMER_SECRET     = "TWITTER_REPEAT_CONSUMER_SECRET"
@@ -40,19 +38,11 @@ func env(key string) string {
 }
 
 func IsProd() bool {
-	return os.Getenv(GOMIC_STAGE) == GOMIC_STAGE_PROD
-}
-
-func GetDsn() string {
-	user := os.Getenv(DB_GOMIC_USER)
-	pass := os.Getenv(DB_GOMIC_PASS)
-	name := os.Getenv(DB_GOMIC_NAME)
-	host := os.Getenv(DB_GOMIC_HOST)
-	return fmt.Sprintf("%s:%s@%s/%s", user, pass, host, name)
+	return env(GOMIC_STAGE) == GOMIC_STAGE_PROD
 }
 
 func GetTlsPaths() (string, string) {
-	cert := os.Getenv(TLS_CERT_PATH)
-	key := os.Getenv(TLS_KEY_PATH)
+	cert := env(TLS_CERT_PATH)
+	key := env(TLS_KEY_PATH)
 	return cert, key
 }

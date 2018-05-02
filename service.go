@@ -103,6 +103,7 @@ func authenticate(req *restful.Request) error {
 }
 
 func Echo(request *restful.Request, response *restful.Response) {
+	log.Println("Request triggered echo function from", request.Request.Host)
 	err, c := readContent(request)
 	if err != nil {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
