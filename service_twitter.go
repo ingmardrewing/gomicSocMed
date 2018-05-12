@@ -11,6 +11,13 @@ import (
 
 func tweet(c *Content) int64 {
 	log.Println("Tweeting content")
+	client := getRepeatClient()
+	verify(client)
+	return tweetContent(client, c)
+}
+
+func doubletweet(c *Content) int64 {
+	log.Println("Tweeting content")
 	client := getOriginClient()
 	verify(client)
 	tweet_id := tweetContent(client, c)
