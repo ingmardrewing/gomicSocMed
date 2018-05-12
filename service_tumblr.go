@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/MariaTerzieva/gotumblr"
@@ -30,6 +31,7 @@ func postToTumblr(c *Content) {
 }
 
 func getMappedContent(c *Content) map[string]string {
+	fmt.Println("Tumbler tags:", c.TagsCsvString)
 	return map[string]string{
 		"link":    c.Link,
 		"source":  c.ImgUrl,
