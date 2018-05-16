@@ -22,8 +22,8 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	store.Initialize(shared.Env(shared.PATH_TO_FILE_DB))
 	restful.Add(NewSocMedService())
-	store.Initialize()
 	port := shared.Env(shared.GOMIC_SOCMED_PROD_PORT)
 
 	/*
