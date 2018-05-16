@@ -106,6 +106,12 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 func postToFacebook(c *Content) []fb.Result {
 	log.Println("Posting to facebook")
+	resp := postToFacebookAs(c, "drewingde")
+	return []fb.Result{resp}
+}
+
+func postToFacebookCascade(c *Content) []fb.Result {
+	log.Println("Posting to facebook, cascading")
 
 	results := []fb.Result{}
 
@@ -150,15 +156,8 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 
 func repostToFacebookAs(link string, name string) fb.Result {
 	log.Println("repostToFacebookAs")
-	access_token, err := store.Read(name + "_token")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	id, err := store.Read(name + "_id")
-	if err != nil {
-		log.Fatal(err)
-	}
+	access_token := retrieveTokenFor(name)
+	id := retrieveIdFor(name)
 
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
