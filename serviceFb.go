@@ -77,6 +77,7 @@ func FacebookGetAccessToken(request *restful.Request, response *restful.Response
 
 func FacebookCallback(r *restful.Request, response *restful.Response) {
 	log.Println("FacebookCallback called")
+
 	code := r.Request.FormValue("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
@@ -85,8 +86,8 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 	}
 
 	accounts_url := "https://graph.facebook.com/me/accounts?access_token=" + url.QueryEscape(token.AccessToken)
-
 	log.Println("Getting url", accounts_url)
+
 	resp, err := http.Get(accounts_url)
 	if err != nil {
 		log.Printf("Get: %s\n", err)
