@@ -71,11 +71,12 @@ func FacebookGetAccessToken(request *restful.Request, response *restful.Response
 	Url.RawQuery = parameters.Encode()
 	url := Url.String()
 
+	log.Println("Redirecting to", url)
 	http.Redirect(response, request.Request, url, http.StatusTemporaryRedirect)
 }
 
 func FacebookCallback(r *restful.Request, response *restful.Response) {
-	log.Println("FacebookCallback")
+	log.Println("FacebookCallback called")
 	code := r.Request.FormValue("code")
 	token, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
@@ -85,6 +86,7 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 	accounts_url := "https://graph.facebook.com/me/accounts?access_token=" + url.QueryEscape(token.AccessToken)
 
+	log.Println("Getting url", accounts_url)
 	resp, err := http.Get(accounts_url)
 	if err != nil {
 		log.Printf("Get: %s\n", err)
@@ -96,7 +98,9 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 	log.Println(string(response2))
 
-	////storeFBAccessToken(string(response2))
+	extractedToken := extractFBAccessToken(string(response2))
+	accountName := "drewingde"
+	storeFBAccessToken(accountName, extractedToken)
 }
 
 func postToFacebook(c *Content) []fb.Result {
@@ -104,7 +108,7 @@ func postToFacebook(c *Content) []fb.Result {
 
 	results := []fb.Result{}
 
-	resp1 := postToFacebookAs(c, "fb_devabode_poster")
+	resp1 := postToFacebookAs(c, "devabode")
 	results = append(results, resp1)
 
 	str, ok := resp1.Get("id").(string)
@@ -112,7 +116,7 @@ func postToFacebook(c *Content) []fb.Result {
 		parts := strings.Split(str, "_")
 		link := fmt.Sprintf("https://www.facebook.com/%s/posts/%s", parts[0], parts[1])
 
-		resp2 := repostToFacebookAs(link, "fb_drewingde")
+		resp2 := repostToFacebookAs(link, "drewingde")
 		results = append(results, resp2)
 	}
 
@@ -121,15 +125,9 @@ func postToFacebook(c *Content) []fb.Result {
 
 func postToFacebookAs(c *Content, name string) fb.Result {
 	log.Println("postToFacebook")
-	access_token, err := store.Read(name + "_token")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("got fb access token", access_token)
-	id, err := store.Read(name + "_id")
-	if err != nil {
-		log.Fatal(err)
-	}
+	access_token := retrieveTokenFor(name)
+	id := retrieveIdFor(name)
+	log.Println("got fb access token", access_token, "and id", id)
 
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
@@ -185,11 +183,29 @@ func getTagsForFacebook(c *Content) string {
 	return txt
 }
 
-func storeFBAccessToken(token string) {
-	log.Println("storeFBAccessToken")
-
-	// TODO parse json properly, store all tokens
+func extractFBAccessToken(response string) string {
 	re := regexp.MustCompile("\"access_token\":\"([^\"]+)\"")
-	matches := re.FindStringSubmatch(token)
-	store.CreateIfNonExistentElseUpdate("fb_drewingde_token", matches[1])
+	matches := re.FindStringSubmatch(response)
+	return matches[1]
+}
+
+func storeFBAccessToken(account_name, token string) {
+	fileKey := account_name + "_fb_token"
+	store.CreateIfNonExistentElseUpdate(fileKey, token)
+}
+
+func retrieveTokenFor(account_name string) string {
+	return read(account_name + "_fb_token")
+}
+
+func retrieveIdFor(account_name string) string {
+	return read(account_name + "_fb_id")
+}
+
+func read(key string) string {
+	value, err := store.Read(key)
+	if err != nil {
+		log.Fatal("Couldn't read value for key", key)
+	}
+	return value
 }

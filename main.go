@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 func main() {
 	logfile := path.Join(shared.Env(shared.GOMIC_PATH_TO_LOG), "log")
 	f, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	fmt.Println("Now logging to", logfile)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
