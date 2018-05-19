@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"unicode/utf8"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -76,13 +75,17 @@ func reTweetContent(client *twitter.Client, tweet_id int64) int64 {
 
 func getTweetText(c *Content) string {
 	tweet := c.Title + " " + c.Link
+	return addTags(tweet, c.Tags)
+}
 
-	for _, tag := range c.Tags {
-		if utf8.RuneCountInString(tweet+" #"+tag) > 140 {
+func addTags(tweet string, tags []string) string {
+	TWEET_LIMIT := 280
+	for _, tag := range tags {
+		tweetPlusTag := tweet + " #" + tag
+		if len(tweetPlusTag) > TWEET_LIMIT {
 			return tweet
 		}
-		tweet += " #" + tag
+		tweet = tweetPlusTag
 	}
-
 	return tweet
 }
