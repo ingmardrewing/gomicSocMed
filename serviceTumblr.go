@@ -37,6 +37,7 @@ func getMappedContent(c *Content) map[string]string {
 		"source":  c.ImgUrl,
 		"caption": c.Title,
 		"tags":    c.TagsCsvString,
+		"body":    c.Description,
 		"state":   "published"}
 }
 
