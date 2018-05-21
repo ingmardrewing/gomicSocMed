@@ -135,6 +135,7 @@ func postToFacebookAsMe(c *Content, name string) fb.Result {
 	access_token := retrieveTokenFor(name)
 	log.Println("got fb access token", access_token)
 
+	message := c.Description + " " + getTagsForFacebook(c)
 	resp, err := fb.Post("/me/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
@@ -142,7 +143,7 @@ func postToFacebookAsMe(c *Content, name string) fb.Result {
 		"picture":      c.ImgUrl,
 		"link":         c.Link,
 		"description":  c.Description,
-		"message":      getTagsForFacebook(c),
+		"message":      message,
 		"access_token": access_token,
 	})
 	if err != nil {
@@ -158,6 +159,7 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 	id := retrieveIdFor(name)
 	log.Println("got fb access token", access_token, "and id", id)
 
+	message := c.Description + " " + getTagsForFacebook(c)
 	resp, err := fb.Post("/"+id+"/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
@@ -165,7 +167,7 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 		"picture":      c.ImgUrl,
 		"link":         c.Link,
 		"description":  c.Description,
-		"message":      getTagsForFacebook(c),
+		"message":      message,
 		"access_token": access_token,
 	})
 	if err != nil {
