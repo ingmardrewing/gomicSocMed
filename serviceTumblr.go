@@ -33,12 +33,12 @@ func postToTumblr(c *Content) {
 func getMappedContent(c *Content) map[string]string {
 	fmt.Println("Tumbler tags:", c.TagsCsvString)
 	return map[string]string{
-		"link":    c.Link,
-		"source":  c.ImgUrl,
-		"caption": c.Title,
-		"tags":    c.TagsCsvString,
-		"body":    c.Description,
-		"state":   "published"}
+		"link":        c.Link,
+		"source":      c.ImgUrl,
+		"caption":     c.Title,
+		"tags":        c.TagsCsvString,
+		"description": c.Description,
+		"state":       "published"}
 }
 
 func getTumblrClient() *gotumblr.TumblrRestClient {
