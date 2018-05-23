@@ -136,7 +136,7 @@ func postToFacebookAsMe(c *Content, name string) fb.Result {
 	access_token := retrieveTokenFor(name)
 	log.Println("got fb access token", access_token)
 
-	message := c.Description + " " + getTagsForFacebook(c)
+	message := c.Title + " " + getTagsForFacebook(c)
 	resp, err := fb.Post("/me/feed", fb.Params{
 		"type":         "link",
 		"name":         c.Title,
