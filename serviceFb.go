@@ -59,8 +59,8 @@ func FacebookGetAccessToken(request *restful.Request, response *restful.Response
 	if err != nil {
 		log.Fatal("Parse: ", err)
 	}
-	parameters := url.Values{}
 
+	parameters := url.Values{}
 	parameters.Add("client_id", oauthConf.ClientID)
 	parameters.Add("scope", strings.Join(oauthConf.Scopes, " "))
 	parameters.Add("redirect_uri", oauthConf.RedirectURL)
@@ -105,7 +105,7 @@ func FacebookCallback(r *restful.Request, response *restful.Response) {
 
 func postToFacebook(c *Content) []fb.Result {
 	log.Println("Posting to facebook")
-	resp := postToFacebookAs(c, "ingmardrewing")
+	resp := postToFacebookAsMe(c, "ingmardrewing")
 	return []fb.Result{resp}
 }
 
@@ -130,6 +130,7 @@ func postToFacebookCascade(c *Content) []fb.Result {
 	return results
 }
 
+*/
 func postToFacebookAsMe(c *Content, name string) fb.Result {
 	log.Println("postToFacebook")
 	access_token := retrieveTokenFor(name)
@@ -153,15 +154,17 @@ func postToFacebookAsMe(c *Content, name string) fb.Result {
 	}
 	return resp
 }
-*/
 
+/*
 func postToFacebookAs(c *Content, name string) fb.Result {
 	log.Println("postToFacebook")
-	access_token := retrieveTokenFor(name)
-	id := retrieveIdFor(name)
 
+	access_token := retrieveTokenFor(name)
+	fbpath := "/" + retrieveIdFor(name) + "/feed"
 	message := c.Description + " " + getTagsForFacebook(c)
-	resp, err := fb.Post("/"+id+"/feed", fb.Params{
+
+	fmt.Println("posting to " + fbpath)
+	resp, err := fb.Post(fbpath, fb.Params{
 		"type":         "link",
 		"name":         c.Title,
 		"caption":      c.Title,
@@ -178,6 +181,7 @@ func postToFacebookAs(c *Content, name string) fb.Result {
 	}
 	return resp
 }
+*/
 
 func repostToFacebookAs(link string, name string) fb.Result {
 	log.Println("repostToFacebookAs")
