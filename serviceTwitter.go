@@ -8,14 +8,14 @@ import (
 	shared "github.com/ingmardrewing/gomicSocMedShared"
 )
 
-func tweet(c *Content) int64 {
+func tweet(c *shared.Content) int64 {
 	log.Println("Tweeting content")
 	client := getRepeatClient()
 	verify(client)
 	return tweetContent(client, c)
 }
 
-func doubletweet(c *Content) int64 {
+func doubletweet(c *shared.Content) int64 {
 	log.Println("Tweeting content")
 	client := getOriginClient()
 	verify(client)
@@ -63,7 +63,7 @@ func verify(client *twitter.Client) {
 	log.Printf("User's ACCOUNT:\n%+v\n", user)
 }
 
-func tweetContent(client *twitter.Client, c *Content) int64 {
+func tweetContent(client *twitter.Client, c *shared.Content) int64 {
 	tweet, _, _ := client.Statuses.Update(getTweetText(c), nil)
 	return tweet.ID
 }
@@ -73,7 +73,7 @@ func reTweetContent(client *twitter.Client, tweet_id int64) int64 {
 	return tweet.ID
 }
 
-func getTweetText(c *Content) string {
+func getTweetText(c *shared.Content) string {
 	tweet := c.Title + " " + c.Link
 	return addTags(tweet, c.Tags)
 }

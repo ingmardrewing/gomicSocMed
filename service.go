@@ -13,10 +13,6 @@ import (
 	shared "github.com/ingmardrewing/gomicSocMedShared"
 )
 
-type Content struct {
-	shared.Content
-}
-
 func NewSocMedService() *restful.WebService {
 	path := fmt.Sprintf("/%s/%s",
 		shared.CURRENT_REST_VERSION,
@@ -120,7 +116,7 @@ func Publish(request *restful.Request, response *restful.Response) {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-	tweet(c)
+	tweetMedia(c)
 	postToTumblr(c)
 
 	result := []fb.Result{}
@@ -133,7 +129,7 @@ func PublishTwitter(request *restful.Request, response *restful.Response) {
 		response.WriteErrorString(400, "400: Bad Request ("+err.Error()+")")
 		return
 	}
-	tweet_id := tweet(c)
+	tweet_id := tweetMedia(c)
 
 	response.WriteEntity(tweet_id)
 }
@@ -161,7 +157,7 @@ func PublishTumblr(request *restful.Request, response *restful.Response) {
 	response.WriteEntity(c)
 }
 
-func checkContent(c *Content) error {
+func checkContent(c *shared.Content) error {
 	msg := []string{}
 	if len(c.Link) == 0 {
 		msg = append(msg, "No Link given")
@@ -185,12 +181,12 @@ func checkContent(c *Content) error {
 	return nil
 }
 
-func readContent(request *restful.Request) (error, *Content) {
-	c := new(Content)
+func readContent(request *restful.Request) (error, *shared.Content) {
+	c := new(shared.Content)
 	request.ReadEntity(c)
 	err := checkContent(c)
 	if err != nil {
-		return err, new(Content)
+		return err, new(shared.Content)
 	}
 	if len(c.TagsCsvString) > 0 {
 		c.Tags = strings.Split(c.TagsCsvString, ",")
