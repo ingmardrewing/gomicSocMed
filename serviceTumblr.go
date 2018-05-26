@@ -13,7 +13,7 @@ func TumblrCallback(request *restful.Request, response *restful.Response) {
 	// TODO
 }
 
-func postToTumblr(c *Content) {
+func postToTumblr(c *shared.Content) {
 	log.Println("Posting to tumblr")
 	client := getTumblrClient()
 	mappedContent := getMappedContent(c)
@@ -30,7 +30,7 @@ func postToTumblr(c *Content) {
 	}
 }
 
-func getMappedContent(c *Content) map[string]string {
+func getMappedContent(c *shared.Content) map[string]string {
 	fmt.Println("Tumbler tags:", c.TagsCsvString)
 	return map[string]string{
 		"link":        c.Link,
