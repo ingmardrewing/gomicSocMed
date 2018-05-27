@@ -69,3 +69,15 @@ func getMediaTweetText(c *shared.Content) string {
 	tweet := c.Title + " " + c.Link
 	return addTags(tweet, c.Tags)
 }
+
+func addTags(tweet string, tags []string) string {
+	TWEET_LIMIT := 280
+	for _, tag := range tags {
+		tweetPlusTag := tweet + " #" + tag
+		if len(tweetPlusTag) > TWEET_LIMIT {
+			return tweet
+		}
+		tweet = tweetPlusTag
+	}
+	return tweet
+}
